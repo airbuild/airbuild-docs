@@ -1,0 +1,55 @@
+---
+title: Introduction
+description: What is AirBuild and what can it do for your mobile team?
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+**AirBuild** is an over-the-air (OTA) app distribution platform that lets you upload iOS (`.ipa`) and Android (`.apk`) builds, share instant install links with QR codes, manage testers, capture device UDIDs, and automate your release workflow — all from a single dashboard.
+
+Built with Next.js, Better Auth, Prisma/PostgreSQL, S3-compatible storage, and Razorpay billing, AirBuild is developed by **Increatech Business Solution Pvt Ltd**, Coimbatore, India.
+
+## Key features
+
+- **Upload IPA & APK builds** — Drag and drop your build files and AirBuild handles the rest.
+- **Instant install links** — Every build gets a shareable URL (e.g. `airbuild.dev/i/abc123`) with an auto-generated QR code.
+- **iOS OTA installation** — AirBuild generates the manifest plist and serves it over HTTPS so testers can install ad-hoc and enterprise builds directly from Safari.
+- **Android APK installation** — Testers download and install APKs straight from the install page.
+- **UDID capture** — Collect iOS device UDIDs with a one-tap profile installation flow, so you can add devices to your provisioning profile without spreadsheets.
+- **Team management** — Invite members, assign roles (Owner, Admin, Developer, Tester, Guest), and control access per organization.
+- **Billing & plans** — Upgrade, downgrade, or cancel anytime with INR/USD pricing via Razorpay. Download invoices on demand.
+- **Webhooks** — Receive HTTP callbacks for builds, links, downloads, subscriptions, and team events.
+- **API keys** — Generate tokens for CLI and CI/CD access without a browser session.
+- **CLI tool** — A standalone Go binary to upload builds and manage links from the terminal or your CI pipeline.
+
+## Who is it for?
+
+- **Mobile development teams** who need a fast, reliable way to distribute builds to testers and stakeholders.
+- **QA testers** who want a one-tap install experience without tangled spreadsheets or UDID emails.
+- **Agencies and freelancers** managing multiple clients and apps under separate organizations.
+
+## Supported platforms
+
+| Platform | File format |
+| -------- | ----------- |
+| iOS      | `.ipa`      |
+| Android  | `.apk`      |
+
+> `.aab` (Android App Bundle) files are **not** supported. Export a universal APK from your bundle before uploading.
+
+## Next steps
+
+<CardGrid stagger>
+	<Card title="Quick Start" icon="seti:settings">
+		Get your first build online in five minutes — [Start →](/getting-started/quick-start/)
+	</Card>
+	<Card title="Create an Organization" icon="seti:org">
+		Understand workspaces, roles, and branding — [Read →](/getting-started/organization/)
+	</Card>
+	<Card title="Upload Builds" icon="seti:default">
+		Learn the upload flow and metadata extraction — [Read →](/guides/upload-builds/)
+	</Card>
+	<Card title="API Reference" icon="seti:api">
+		Integrate AirBuild with your CI/CD pipeline — [Read →](/developer/api-reference/)
+	</Card>
+</CardGrid>
