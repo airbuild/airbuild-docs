@@ -1,49 +1,71 @@
-# Starlight Starter Kit: Basics
+# AirBuild Docs
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+The documentation site for [AirBuild](https://airbuild.dev) — the OTA app distribution platform for uploading builds, sharing install links, and managing testers.
 
-```
-npm create astro@latest -- --template starlight
-```
+Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Structure
 
 ```
-.
-├── public/
+docs-site/
 ├── src/
-│   ├── assets/
+│   ├── assets/              # Logo, favicon, images
 │   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
+│   │   └── docs/            # Markdown documentation pages
+│   │       ├── getting-started/   # Quick start, organization setup
+│   │       ├── guides/            # Upload, install links, iOS/Android, UDID, billing
+│   │       ├── developer/         # API keys, REST API, webhooks, CLI, SDKs
+│   │       └── resources/         # FAQ, troubleshooting
+│   ├── styles/
+│   │   └── custom.css       # Custom theme overrides
+│   └── content.config.ts    # Content collection schema
+├── astro.config.mjs         # Starlight config (sidebar, nav, social)
 ├── package.json
 └── tsconfig.json
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+## Documentation sections
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+- **Getting Started** — Quick start guide, creating an organization
+- **Guides** — Upload builds, install links & QR codes, iOS OTA installation, Android APK installation, UDID capture, team management, billing & plans
+- **Developer** — API keys, REST API reference, webhooks, CLI tool, SDKs
+- **Resources** — FAQ, troubleshooting
 
-Static assets, like favicons, can be placed in the `public/` directory.
+## Commands
 
-## 🧞 Commands
+| Command           | Action                                       |
+| ----------------- | -------------------------------------------- |
+| `npm install`     | Install dependencies                         |
+| `npm run dev`     | Start local dev server at `localhost:4321`   |
+| `npm run build`   | Build production site to `./dist/`           |
+| `npm run preview` | Preview the production build locally         |
 
-All commands are run from the root of the project, from a terminal:
+## Writing docs
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Documentation pages are Markdown (`.md`) or MDX (`.mdx`) files in `src/content/docs/`. Each file is exposed as a route based on its file path.
 
-## 👀 Want to learn more?
+### Frontmatter
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+```markdown
+---
+title: Page Title
+description: Short description shown in search and sidebar
+---
+
+# Page Title
+
+Content here...
+```
+
+### Sidebar navigation
+
+The sidebar is configured in `astro.config.mjs` under the `sidebar` key. To add a new page, create the Markdown file and add an entry to the appropriate sidebar section.
+
+### Links
+
+- Internal links use relative paths: `[Quick Start](../getting-started/quick-start/)`
+- External links use full URLs: `[AirBuild](https://airbuild.dev)`
+
+## Deployment
+
+The site is configured for `https://docs.airbuild.dev`. Build with `npm run build` and deploy the `./dist/` directory to your hosting provider.
