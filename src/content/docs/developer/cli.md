@@ -12,7 +12,7 @@ The AirBuild CLI is a standalone **Go binary** that lets you upload builds, list
 ### One-liner (macOS & Linux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/airbuild/cli/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
 ```
 
 This downloads the latest binary, installs it to `~/.local/bin/airbuild`, and checks that the directory is in your PATH.
@@ -20,23 +20,23 @@ This downloads the latest binary, installs it to `~/.local/bin/airbuild`, and ch
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/airbuild/cli/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.ps1 | iex
 ```
 
 This downloads the latest binary, installs it to `%LOCALAPPDATA%\AirBuild\airbuild.exe`, and adds the directory to your user PATH.
 
 ### Manual download
 
-Pre-built binaries for macOS, Linux, and Windows are available on the [GitHub Releases page](https://github.com/airbuild/cli/releases).
+Pre-built binaries for macOS, Linux, and Windows are available on the [GitHub Releases page](https://github.com/airbuild/airbuild-cli/releases).
 
 ```bash
 # macOS (Apple Silicon)
-curl -L -o airbuild https://github.com/airbuild/cli/releases/latest/download/airbuild-darwin-arm64
+curl -L -o airbuild https://github.com/airbuild/airbuild-cli/releases/latest/download/airbuild-darwin-arm64
 chmod +x airbuild
 sudo mv airbuild /usr/local/bin/
 
 # Linux (x86_64)
-curl -L -o airbuild https://github.com/airbuild/cli/releases/latest/download/airbuild-linux-amd64
+curl -L -o airbuild https://github.com/airbuild/airbuild-cli/releases/latest/download/airbuild-linux-amd64
 chmod +x airbuild
 sudo mv airbuild /usr/local/bin/
 ```
@@ -45,7 +45,7 @@ sudo mv airbuild /usr/local/bin/
 # Windows (PowerShell)
 $dir = "$env:LOCALAPPDATA\AirBuild"
 New-Item -ItemType Directory -Path $dir -Force
-Invoke-WebRequest "https://github.com/airbuild/cli/releases/latest/download/airbuild-windows-amd64.exe" -OutFile "$dir\airbuild.exe"
+Invoke-WebRequest "https://github.com/airbuild/airbuild-cli/releases/latest/download/airbuild-windows-amd64.exe" -OutFile "$dir\airbuild.exe"
 [Environment]::SetEnvironmentVariable("Path", "$env:Path;$dir", "User")
 ```
 
@@ -54,7 +54,7 @@ Invoke-WebRequest "https://github.com/airbuild/cli/releases/latest/download/airb
 If you have Go 1.23+ installed:
 
 ```bash
-go install github.com/airbuild/cli@latest
+go install github.com/airbuild/airbuild-cli@latest
 ```
 
 ## Authentication
@@ -306,7 +306,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install AirBuild CLI
-        run: curl -fsSL https://raw.githubusercontent.com/airbuild/cli/main/install.sh | bash
+        run: curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
 
       - name: Login
         run: airbuild login --api-key ${{ secrets.AIRBUILD_API_KEY }}
@@ -335,7 +335,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install AirBuild CLI
-        run: curl -fsSL https://raw.githubusercontent.com/airbuild/cli/main/install.sh | bash
+        run: curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
 
       - name: Login
         run: airbuild login --api-key ${{ secrets.AIRBUILD_API_KEY }}
@@ -355,7 +355,7 @@ distribute:
   only:
     - tags
   script:
-    - curl -fsSL https://raw.githubusercontent.com/airbuild/cli/main/install.sh | bash
+    - curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
     - airbuild login --api-key $AIRBUILD_API_KEY
     - airbuild push --json
 ```
@@ -364,7 +364,7 @@ distribute:
 
 ```yaml
 - script: |
-    irm https://raw.githubusercontent.com/airbuild/cli/main/install.ps1 | iex
+    irm https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.ps1 | iex
     airbuild login --api-key $(AIRBUILD_API_KEY)
     airbuild push --platform android --release
 ```
@@ -378,6 +378,21 @@ Pre-built binaries are available for:
 - **Windows** — x86_64 (`windows-amd64`) and ARM64 (`windows-arm64`)
 
 The CLI auto-enables ANSI colors on Windows 10+ (VT processing) and falls back to plain text on legacy terminals.
+
+### Windows Defender false positive
+
+Go binaries are not code-signed by default, which can cause Windows Defender or other antivirus software to flag them as suspicious. This is a **false positive** — the AirBuild CLI is open source and contains no malicious code.
+
+To resolve:
+
+1. **Verify the checksum** — compare the SHA-256 of your downloaded binary with `checksums.txt` from the [release page](https://github.com/airbuild/airbuild-cli/releases).
+2. **Add an exclusion** — in Windows Security > Virus & threat protection > Manage settings > Add or remove exclusions, add the `airbuild.exe` path.
+3. **Build from source** — if you prefer, build from source with Go:
+   ```bash
+   go install github.com/airbuild/airbuild-cli@latest
+   ```
+
+We are working on code signing for future releases to eliminate this issue.
 
 ## Releasing
 
