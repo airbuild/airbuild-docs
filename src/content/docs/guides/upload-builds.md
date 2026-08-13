@@ -49,6 +49,41 @@ When you upload a build, AirBuild parses the file and extracts the following met
 - **App icon**
 - **Provisioning profile info** (iOS only) — name, expiry date, and team ID
 
+## Bundle ID validation
+
+AirBuild enforces **per-platform bundle ID consistency** to prevent accidentally uploading builds from different apps to the same AirBuild app.
+
+### How it works
+
+- The **first build** uploaded for a platform (iOS or Android) sets the canonical bundle ID for that platform on the app.
+- Subsequent builds for the **same platform** must match the bundle ID exactly.
+- iOS and Android can have **different** bundle IDs on the same AirBuild app — they are tracked independently.
+
+For example, if your first iOS upload has bundle ID `com.example.myapp`, all future iOS uploads to that app must also use `com.example.myapp`. An upload with `com.example.myapp.dev` will be rejected.
+
+### What happens on mismatch
+
+If you upload a build whose bundle ID doesn't match the one locked in for that platform, the upload is rejected with an error:
+
+> Bundle ID mismatch for iOS. This app's iOS builds use bundle ID "com.example.myapp", but the uploaded file has "com.example.myapp.dev". If you need to use a different bundle ID, archive this app and create a new one.
+
+### Changing a bundle ID
+
+Bundle IDs are locked once set. To use a different bundle ID for a platform:
+
+1. **Archive** the current app (from the app detail page).
+2. **Create a new app** with the desired platforms.
+3. Upload builds to the new app.
+
+This prevents accidental cross-app contamination while keeping the history of each app's builds clean.
+
+### Where bundle IDs are shown
+
+- **App detail page** — shows `iOS: com.example.app` and `Android: com.example.app` separately
+- **Admin organization page** — shows both bundle IDs with platform labels
+- **Install page** — shows the build's bundle ID
+- **CLI** — `airbuild apps list` displays both bundle IDs
+
 ## Release notes
 
 Release notes are optional. Enter a short description of what's new in this build. Release notes are shown on the install page and included in email notifications.
