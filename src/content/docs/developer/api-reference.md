@@ -193,6 +193,85 @@ curl -X POST https://airbuild.dev/api/dl/{slug}/unlock \
   -d '{"password":"s3cret"}'
 ```
 
+### SDK endpoints
+
+These public endpoints are used by the AirBuild SDKs (Flutter, React Native, iOS, Android). They do not require an API key — authentication is via the distribution key (`dk_xxx`) which is public and safe to embed in client apps.
+
+#### `GET /api/sdk/check-update` — Check for updates
+
+Query the server for the latest build available for a given app and platform.
+
+| Parameter   | Type   | Required | Description                              |
+| ----------- | ------ | -------- | ---------------------------------------- |
+| `key`       | string | ✓        | Distribution key (`dk_xxx`).             |
+| `version`   | string | ✓        | Current app version (e.g. `1.0.0`).      |
+| `platform`  | string | ✓        | `ios` or `android`.                      |
+
+```bash
+curl "https://airbuild.dev/api/sdk/check-update?key=dk_xxx&version=1.0.0&platform=android"
+```
+
+Response when an update is available:
+
+```json
+{
+  "hasUpdate": true,
+  "latestVersion": "1.2.0",
+  "latestBuildNumber": 42,
+  "buildId": "clxxxxx",
+  "releaseNotes": "Bug fixes and performance improvements",
+  "downloadUrl": "https://airbuild.dev/api/sdk/download/abc123",
+  "installUrl": "https://airbuild.dev/d/abc123",
+  "fileSizeBytes": 24567890,
+  "iconUrl": "https://airbuild.dev/icon/app-icon.png",
+  "minOsVersion": "13.0",
+  "isPasswordProtected": false,
+  "createdAt": "2026-09-01T12:00:00.000Z"
+}
+```
+
+Response when no update is available:
+
+```json
+{ "hasUpdate": false }
+```
+
+#### `GET /api/sdk/download/{key}` — Download build
+
+Redirects to a signed S3 URL for the build binary (APK or IPA). Used by Android SDKs to download the APK for installation.
+
+```bash
+curl -L "https://airbuild.dev/api/sdk/download/{key}" -o app.apk
+```
+
+#### `POST /api/sdk/report-event` — Report analytics event
+
+Records an analytics event from the SDK. Used for tracking update prompts, downloads, and installs.
+
+| Field      | Type   | Required | Description                                              |
+| ---------- | ------ | -------- | -------------------------------------------------------- |
+| `key`      | string | ✓        | Distribution key (`dk_xxx`).                             |
+| `buildId`  | string | ✓        | The build ID the event pertains to.                      |
+| `event`    | string | ✓        | Event type (see below).                                  |
+| `platform` | string | —        | `ios` or `android`.                                      |
+| `udid`     | string | —        | Device UDID (for iOS ad-hoc distribution).               |
+
+Event types:
+
+| Event                | When it fires                                  |
+| -------------------- | ----------------------------------------------- |
+| `update_prompt_shown` | The update dialog was shown to the tester.     |
+| `update_accepted`     | The tester tapped "Update".                    |
+| `update_declined`     | The tester tapped "Later" or dismissed.        |
+| `download_started`    | The SDK started downloading the APK (Android). |
+| `install_started`     | The SDK triggered the system installer.        |
+
+```bash
+curl -X POST https://airbuild.dev/api/sdk/report-event \
+  -H "Content-Type: application/json" \
+  -d '{"key":"dk_xxx","buildId":"clxxxxx","event":"update_accepted","platform":"android"}'
+```
+
 ### Team
 
 | Method | Path                | Description         |
