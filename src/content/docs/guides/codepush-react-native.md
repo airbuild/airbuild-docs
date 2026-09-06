@@ -1,0 +1,247 @@
+---
+title: React Native CodePush
+description: Push JS bundle updates to React Native apps using the Expo Updates protocol, managed by AirBuild.
+---
+
+# React Native CodePush
+
+React Native CodePush lets you push **JS bundle updates** to your React Native app without a full store re-submission. It implements the open [Expo Updates v1 protocol](https://docs.expo.dev/technical-specs/expo-updates-1/), so no AirBuild client SDK is required — just the standard `expo-updates` package, which works in both Expo-managed and bare React Native apps.
+
+## Prerequisites
+
+- An AirBuild account with the `codepush_react_native` feature flag enabled for your organization
+- The [AirBuild CLI](/developer/cli/) installed
+- Node.js and `npx` available on your PATH
+- `expo-updates` installed in your React Native app:
+
+  ```bash
+  # For Expo apps
+  npx expo install expo-updates
+
+  # For bare React Native apps
+  npm install expo-updates
+  ```
+
+## How it works
+
+1. You export your JS bundle and assets with `npx expo export`
+2. AirBuild stores the bundle and all assets, and creates an update
+3. Your app's `expo-updates` client checks AirBuild's manifest endpoint for updates
+4. If an update is available, the client downloads the bundle and assets
+5. On the next app launch, the new bundle is loaded
+6. You control rollout via channels and percentages
+
+## Enable CodePush for your app
+
+1. Go to your app's detail page in the AirBuild dashboard
+2. Click **"Enable OTA Updates"** in the sidebar
+3. Select **React Native**
+4. Click **Enable**
+
+This generates a distribution key for your app. You'll need this for the `expo-updates` configuration.
+
+## Configure expo-updates in your app
+
+Add the following to your `app.json` (Expo) or `app.config.js`:
+
+```json
+{
+  "expo": {
+    "updates": {
+      "url": "https://your-airbuild-instance/api/codepush/react-native/manifest",
+      "requestHeaders": {
+        "AirBuild-Key": "your-distribution-key"
+      },
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}
+```
+
+> **Important:** The `runtimeVersion` must match the `--runtime-version` you pass to the CLI. If you use `"policy": "appVersion"`, the runtime version will be your app's version string (e.g. `1.0.0`). A new binary build (with a new version) creates a new runtime version — updates published for the old runtime version won't apply to the new binary.
+
+For bare React Native (not using Expo), configure `expo-updates` in your native code. See the [expo-updates documentation](https://docs.expo.dev/eas-update/getting-started/) for setup instructions.
+
+## CLI commands
+
+### `airbuild codepush react-native publish`
+
+Publish a React Native update. Runs `npx expo export` locally, then uploads the bundle and all assets to AirBuild.
+
+```bash
+airbuild codepush react-native publish \
+  --app app_xxx \
+  --platform android \
+  --runtime-version 1.0.0 \
+  --channel production \
+  --release-notes "Fixed navigation bug"
+```
+
+| Flag | Required | Default | Description |
+| ---- | -------- | ------- | ----------- |
+| `--app` | ✓ | — | App ID |
+| `--platform` | ✓ | — | `android` or `ios` |
+| `--runtime-version` | ✓ | — | Must match `expo.updates.runtimeVersion` in app.json |
+| `--channel` | — | `production` | Distribution channel |
+| `--release-notes` | — | — | Release notes |
+| `--output-dir` | — | `dist` | Directory to export to / read from |
+| `--skip-export` | — | `false` | Don't run `npx expo export` — just read `--output-dir` |
+
+**Example — skip export, use pre-exported bundle:**
+
+```bash
+npx expo export --output-dir ./build-output --platform android
+
+airbuild codepush react-native publish \
+  --app app_xxx \
+  --platform android \
+  --runtime-version 1.0.0 \
+  --output-dir ./build-output \
+  --skip-export
+```
+
+### `airbuild codepush react-native promote`
+
+Promote an update to a channel at a specific rollout percentage.
+
+```bash
+# Promote to 25% of production devices
+airbuild codepush react-native promote \
+  --app app_xxx \
+  --update-id update_xxx \
+  --channel production \
+  --rollout 25
+```
+
+| Flag | Required | Default | Description |
+| ---- | -------- | ------- | ----------- |
+| `--app` | ✓ | — | App ID |
+| `--update-id` | — | — | Update ID (from `publish` response or `status`) |
+| `--platform` | — | — | `ANDROID` or `IOS` (alternative to `--update-id`) |
+| `--runtime-version` | — | — | Runtime version (with `--platform`) |
+| `--channel` | — | `production` | Channel to promote to |
+| `--rollout` | — | `100` | Rollout percentage (0–100) |
+
+### `airbuild codepush react-native rollback`
+
+Rollback an update. Devices will revert to the previous version on their next check-in.
+
+```bash
+airbuild codepush react-native rollback \
+  --app app_xxx \
+  --update-id update_xxx
+```
+
+| Flag | Required | Default | Description |
+| ---- | -------- | ------- | ----------- |
+| `--app` | ✓ | — | App ID |
+| `--update-id` | ✓ | — | Update ID |
+
+### `airbuild codepush react-native status`
+
+Show all releases and updates for an app.
+
+```bash
+airbuild codepush react-native status --app app_xxx
+```
+
+| Flag | Required | Default | Description |
+| ---- | -------- | ------- | ----------- |
+| `--app` | ✓ | — | App ID |
+
+Output shows channels, releases (grouped by runtime version), and for each release its updates with status, rollout %, channel, asset count, and creation date.
+
+## Signing key
+
+AirBuild generates a signing key pair for each app when CodePush is enabled. The **public key** is available on the OTA Updates tab in the dashboard and via the API:
+
+```bash
+curl https://your-airbuild-instance/api/apps/app_xxx/codepush/signing-key \
+  -H "Authorization: Bearer airbuild_xxx"
+```
+
+Configure `expo-updates` to verify update signatures by adding the public key to your `app.json`:
+
+```json
+{
+  "expo": {
+    "updates": {
+      "url": "https://your-airbuild-instance/api/codepush/react-native/manifest",
+      "requestHeaders": {
+        "AirBuild-Key": "your-distribution-key"
+      }
+    }
+  }
+}
+```
+
+The signing key ensures that devices only install updates that were signed by AirBuild, preventing tampering.
+
+## Device-side endpoints
+
+The `expo-updates` client interacts with two endpoints:
+
+| Endpoint | Purpose |
+| -------- | ------- |
+| `GET /api/codepush/react-native/manifest?key=xxx` | Returns the Expo Updates manifest (latest update metadata) |
+| `GET /api/codepush/react-native/asset/[id]?key=xxx` | Downloads a specific asset (JS bundle, image, etc.) |
+
+Both endpoints are gated by the `codepush_react_native` feature flag. If the flag is disabled, the manifest endpoint returns a non-success response and no updates are delivered.
+
+## Typical workflow
+
+```bash
+# 1. Publish an update (export + upload)
+airbuild codepush react-native publish \
+  --app app_xxx \
+  --platform android \
+  --runtime-version 1.0.0 \
+  --release-notes "Fixed navigation bug"
+
+# 2. Promote to 25% of devices
+airbuild codepush react-native promote \
+  --app app_xxx \
+  --update-id update_xxx \
+  --channel production \
+  --rollout 25
+
+# 3. Monitor — increase rollout if no issues
+airbuild codepush react-native promote \
+  --app app_xxx \
+  --update-id update_xxx \
+  --channel production \
+  --rollout 100
+
+# 4. Rollback if something goes wrong
+airbuild codepush react-native rollback \
+  --app app_xxx \
+  --update-id update_xxx
+```
+
+## CI/CD integration
+
+CodePush works well in CI/CD pipelines. Example GitHub Actions step:
+
+```yaml
+- name: Publish OTA update
+  env:
+    AIRBUILD_API_KEY: ${{ secrets.AIRBUILD_API_KEY }}
+  run: |
+    airbuild codepush react-native publish \
+      --app ${{ vars.AIRBUILD_APP_ID }} \
+      --platform android \
+      --runtime-version ${{ github.ref_name }} \
+      --channel staging \
+      --release-notes "CI build ${{ github.sha }}"
+```
+
+## Limitations
+
+- **JS bundle only** — updates can change JavaScript code and assets, not native code (native modules, iOS/Android-specific code)
+- **Runtime version must match** — updates only apply to devices running the same runtime version; a new binary build with a different version creates a new runtime version
+- **expo-updates required** — your app must have `expo-updates` installed and configured; standard React Native without it won't check for updates
+- **No rollback to specific version** — rollback disables the current update; devices revert to the previously active update or the bundled version
