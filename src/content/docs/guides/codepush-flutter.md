@@ -162,8 +162,8 @@ Output shows channels, releases, and for each release its patches with status, r
 
 The Shorebird updater in your app needs to point to AirBuild to check for updates. Configure the updater with your app's distribution key:
 
-- **Check URL:** `https://your-airbuild-instance/api/codepush/flutter/check?key=<distribution_key>`
-- **Download URL:** `https://your-airbuild-instance/api/codepush/flutter/patch/<id>/download?key=<distribution_key>`
+- **Check URL:** `https://airbuild.dev/api/codepush/flutter/check?key=<distribution_key>`
+- **Download URL:** `https://airbuild.dev/api/codepush/flutter/patch/<id>/download?key=<distribution_key>`
 
 The distribution key is available on the app's OTA Updates tab in the dashboard.
 

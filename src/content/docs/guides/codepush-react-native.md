@@ -48,7 +48,7 @@ Add the following to your `app.json` (Expo) or `app.config.js`:
 {
   "expo": {
     "updates": {
-      "url": "https://your-airbuild-instance/api/codepush/react-native/manifest",
+      "url": "https://airbuild.dev/api/codepush/react-native/manifest",
       "requestHeaders": {
         "AirBuild-Key": "your-distribution-key"
       },
@@ -160,7 +160,7 @@ Output shows channels, releases (grouped by runtime version), and for each relea
 AirBuild generates a signing key pair for each app when CodePush is enabled. The **public key** is available on the OTA Updates tab in the dashboard and via the API:
 
 ```bash
-curl https://your-airbuild-instance/api/apps/app_xxx/codepush/signing-key \
+curl https://airbuild.dev/api/apps/app_xxx/codepush/signing-key \
   -H "Authorization: Bearer airbuild_xxx"
 ```
 
@@ -170,7 +170,7 @@ Configure `expo-updates` to verify update signatures by adding the public key to
 {
   "expo": {
     "updates": {
-      "url": "https://your-airbuild-instance/api/codepush/react-native/manifest",
+      "url": "https://airbuild.dev/api/codepush/react-native/manifest",
       "requestHeaders": {
         "AirBuild-Key": "your-distribution-key"
       }
