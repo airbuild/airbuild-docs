@@ -1,11 +1,11 @@
 ---
 title: React Native CodePush
-description: Push JS bundle updates to React Native apps using the Expo Updates protocol, managed by AirBuild.
+description: Push JS bundle updates to React Native apps without a store re-submission, with staged rollout and rollback.
 ---
 
 # React Native CodePush
 
-React Native CodePush lets you push **JS bundle updates** to your React Native app without a full store re-submission. It implements the open [Expo Updates v1 protocol](https://docs.expo.dev/technical-specs/expo-updates-1/), so no AirBuild client SDK is required — just the standard `expo-updates` package, which works in both Expo-managed and bare React Native apps.
+React Native CodePush lets you push **JS bundle updates** to your React Native app without a full store re-submission. Ship bug fixes and small tweaks in minutes, with staged rollout and instant rollback. It works with both Expo-managed and bare React Native apps using the standard `expo-updates` package.
 
 ## Prerequisites
 
@@ -24,12 +24,11 @@ React Native CodePush lets you push **JS bundle updates** to your React Native a
 
 ## How it works
 
-1. You export your JS bundle and assets with `npx expo export`
-2. AirBuild stores the bundle and all assets, and creates an update
-3. Your app's `expo-updates` client checks AirBuild's manifest endpoint for updates
-4. If an update is available, the client downloads the bundle and assets
-5. On the next app launch, the new bundle is loaded
-6. You control rollout via channels and percentages
+1. You publish an update with AirBuild (the CLI exports your bundle and assets for you)
+2. Your app checks AirBuild for updates on launch
+3. If an update is available, the app downloads the new bundle and assets
+4. On the next app launch, the new bundle is loaded
+5. You control rollout via channels and percentages
 
 ## Enable CodePush for your app
 
@@ -70,7 +69,7 @@ For bare React Native (not using Expo), configure `expo-updates` in your native 
 
 ### `airbuild codepush react-native publish`
 
-Publish a React Native update. Runs `npx expo export` locally, then uploads the bundle and all assets to AirBuild.
+Publish a React Native update. The CLI exports your bundle and assets locally, then uploads them to AirBuild.
 
 ```bash
 airbuild codepush react-native publish \
@@ -180,17 +179,6 @@ Configure `expo-updates` to verify update signatures by adding the public key to
 ```
 
 The signing key ensures that devices only install updates that were signed by AirBuild, preventing tampering.
-
-## Device-side endpoints
-
-The `expo-updates` client interacts with two endpoints:
-
-| Endpoint | Purpose |
-| -------- | ------- |
-| `GET /api/codepush/react-native/manifest?key=xxx` | Returns the Expo Updates manifest (latest update metadata) |
-| `GET /api/codepush/react-native/asset/[id]?key=xxx` | Downloads a specific asset (JS bundle, image, etc.) |
-
-Both endpoints are gated by the `codepush_react_native` feature flag. If the flag is disabled, the manifest endpoint returns a non-success response and no updates are delivered.
 
 ## Typical workflow
 

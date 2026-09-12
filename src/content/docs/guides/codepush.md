@@ -9,14 +9,14 @@ AirBuild CodePush lets you push **code-only updates** to your mobile apps withou
 
 ## How it works
 
-AirBuild acts as the **control plane** — it stores your releases and patches, manages channels and rollout percentages, and decides which update each device receives. The actual build step happens locally on your machine using the standard tooling for your framework.
+AirBuild acts as the **control plane** — it stores your releases and patches, manages channels and rollout percentages, and decides which update each device receives. The build step happens locally on your machine using the standard tooling for your framework.
 
 ### Two frameworks, one dashboard
 
-| Framework | Protocol | Client SDK | Build tool |
-| --------- | -------- | ---------- | ---------- |
-| **Flutter** | Shorebird's open-source updater | Shorebird runtime (embedded in your app) | `shorebird` CLI |
-| **React Native** | Expo Updates v1 | `expo-updates` (works with bare RN too) | `npx expo export` |
+| Framework | What you push | Build tool |
+| --------- | ------------ | ---------- |
+| **Flutter** | Dart code patches | `airbuild codepush flutter` (wraps the Shorebird CLI) |
+| **React Native** | JS bundle + assets | `airbuild codepush react-native` (wraps `expo export`) |
 
 Both frameworks share the same dashboard UI — the **OTA Updates** tab on each app's detail page — but use separate CLI commands and have independent feature flags.
 
@@ -125,40 +125,25 @@ See the framework-specific guides for detailed setup and usage:
 
 ## API reference
 
-All CodePush endpoints require an API key (`Authorization: Bearer airbuild_xxx`) and are gated by the corresponding feature flag.
+All CodePush endpoints require an API key (`Authorization: Bearer airbuild_xxx`) and are gated by the corresponding feature flag. The CLI wraps these endpoints — you only need them directly if you're writing your own automation.
 
 ### Flutter endpoints
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
-| `POST` | `/api/codepush/flutter/release` | Register a release (upload libapp.so) |
-| `POST` | `/api/codepush/flutter/patch` | Create a patch (upload diff) |
+| `POST` | `/api/codepush/flutter/release` | Register a release |
+| `POST` | `/api/codepush/flutter/patch` | Create a patch |
 | `POST` | `/api/codepush/flutter/promote` | Promote a patch to a channel |
 | `POST` | `/api/codepush/flutter/rollback` | Rollback a patch |
 | `GET` | `/api/codepush/flutter/status?appId=xxx` | List releases and patches |
-| `GET` | `/api/codepush/flutter/check?key=xxx` | Device-facing: check for updates |
-| `GET` | `/api/codepush/flutter/patch/[id]/download?key=xxx` | Device-facing: download a patch |
 
 ### React Native endpoints
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
-| `POST` | `/api/codepush/react-native/publish` | Publish an update (upload bundle + assets) |
+| `POST` | `/api/codepush/react-native/publish` | Publish an update |
 | `POST` | `/api/codepush/react-native/promote` | Promote an update to a channel |
 | `POST` | `/api/codepush/react-native/rollback` | Rollback an update |
 | `GET` | `/api/codepush/react-native/status?appId=xxx` | List releases and updates |
-| `GET` | `/api/codepush/react-native/manifest?key=xxx` | Device-facing: Expo Updates manifest |
-| `GET` | `/api/codepush/react-native/asset/[id]?key=xxx` | Device-facing: download an asset |
-
-### Dashboard endpoints
-
-| Method | Endpoint | Description |
-| ------ | -------- | ----------- |
-| `POST` | `/api/apps/[appId]/codepush/enable` | Enable CodePush for an app |
-| `GET` | `/api/apps/[appId]/codepush` | Get CodePush data (releases, channels) |
-| `GET` | `/api/apps/[appId]/codepush/signing-key` | Get public signing key |
-| `PATCH` | `/api/apps/[appId]/codepush/channels/[name]` | Update a channel |
-| `POST` | `/api/apps/[appId]/codepush/updates/[id]/rollback` | Rollback from dashboard |
-| `PATCH` | `/api/apps/[appId]/codepush/updates/[id]/rollout` | Adjust rollout from dashboard |
 
 All endpoints return `403 OTA Updates are not available for your organization yet.` when the feature flag is disabled.

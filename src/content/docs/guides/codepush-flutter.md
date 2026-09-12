@@ -1,11 +1,11 @@
 ---
 title: Flutter CodePush
-description: Push Dart code patches to Flutter apps using Shorebird's open-source updater, managed by AirBuild.
+description: Push Dart code patches to Flutter apps without a store re-submission, with staged rollout and rollback.
 ---
 
 # Flutter CodePush
 
-Flutter CodePush lets you push **Dart-only code patches** to your Flutter app without a full store re-submission. It's built on [Shorebird's](https://shorebird.dev) open-source updater runtime, with AirBuild acting as the control plane for releases, patches, channels, and rollout.
+Flutter CodePush lets you push **Dart-only code patches** to your Flutter app without a full store re-submission. Ship bug fixes and small tweaks in minutes, with staged rollout and instant rollback.
 
 ## Prerequisites
 
@@ -17,17 +17,15 @@ Flutter CodePush lets you push **Dart-only code patches** to your Flutter app wi
   dart pub global activate shorebird_cli
   ```
 
-- Your Flutter app initialized with Shorebird (the Shorebird runtime embedded in your build)
+- Your Flutter app built with the Shorebird updater embedded (see the [Shorebird docs](https://shorebird.dev/) for setup)
 
 ## How it works
 
-1. You build a release with `shorebird release` — this produces a `libapp.so` containing the Dart code
-2. AirBuild stores the release artifact and registers it as a versioned release
-3. You fix a bug in your Dart code
-4. You create a patch with `shorebird patch` — this produces a binary diff
-5. AirBuild stores the patch and makes it available to devices
-6. Devices running the Shorebird updater check AirBuild for updates and download the patch
-7. You control rollout via channels and percentages
+1. You register a release with AirBuild (the CLI builds it for you)
+2. You fix a bug in your Dart code
+3. You create a patch with AirBuild (the CLI builds and diffs it for you)
+4. Devices check AirBuild for updates and download the patch on next launch
+5. You control rollout via channels and percentages
 
 ## Enable CodePush for your app
 
@@ -42,7 +40,7 @@ This generates a distribution key for your app. You'll need this for the device-
 
 ### `airbuild codepush flutter release`
 
-Register a Flutter release. Runs `shorebird release` locally, then uploads the artifact to AirBuild.
+Register a Flutter release. The CLI builds the release locally and uploads it to AirBuild.
 
 ```bash
 airbuild codepush flutter release android \
@@ -60,33 +58,29 @@ airbuild codepush flutter release android \
 | `--flutter-revision` | — | — | Flutter SDK version used to build |
 | `--shorebird-app-id` | — | — | Shorebird app_id, if tracking one |
 | `--release-notes` | — | — | Release notes |
-| `--artifact` | — | auto-detect | Path to the built libapp.so (skips build) |
-| `--skip-build` | — | `false` | Don't run `shorebird release` — just upload `--artifact` |
+| `--artifact` | — | auto-detect | Path to a pre-built release artifact (skips the build step) |
+| `--skip-build` | — | `false` | Don't build — just upload `--artifact` |
 
-**Example — skip the build, upload an existing artifact:**
+**Example — upload a pre-built artifact:**
 
 ```bash
 airbuild codepush flutter release android \
   --app app_xxx \
   --version 1.0.0+1 \
-  --artifact build/app/intermediates/flutter/release/arm64-v8a/libapp.so \
+  --artifact path/to/release.artifact \
   --skip-build
 ```
 
 ### `airbuild codepush flutter patch`
 
-Create a Flutter patch. Run `shorebird patch` locally first, then upload the resulting diff.
+Create a Flutter patch. The CLI builds your patched app, computes a diff against the release, and uploads the diff to AirBuild — no manual diffing required.
 
 ```bash
 # 1. Fix your Dart bug
-# 2. Run shorebird patch (produces the diff)
-shorebird patch android --no-confirm
-
-# 3. Upload the patch to AirBuild
+# 2. Create and upload the patch
 airbuild codepush flutter patch android \
   --app app_xxx \
   --release-version 1.0.0+1 \
-  --artifact path/to/patch.diff \
   --release-notes "Fixed login crash on Android 14"
 ```
 
@@ -97,10 +91,10 @@ airbuild codepush flutter patch android \
 | `--architecture` | — | — | Target architecture, e.g. `arm64-v8a` |
 | `--channel` | — | `production` | Distribution channel |
 | `--release-notes` | — | — | Patch notes |
-| `--artifact` | ✓ | — | Path to the patch diff file |
-| `--skip-build` | — | `false` | Don't run `shorebird patch` — just upload |
+| `--artifact` | — | auto-diff | Path to a pre-built patch diff (skips auto-diff) |
+| `--skip-build` | — | `false` | Don't build — use existing build output or `--artifact` |
 
-> **Note:** The `--artifact` flag is required because Shorebird's `patch` command doesn't leave a stable, documented local file behind. Run `shorebird patch` yourself first, then pass the resulting artifact via `--artifact`.
+> **Note:** Android auto-diff is fully automatic. iOS auto-diff is best-effort; if the CLI can't locate the generated diff, pass `--artifact` with a manually created diff.
 
 ### `airbuild codepush flutter promote`
 
@@ -178,12 +172,10 @@ airbuild codepush flutter release android \
 # 2. Fix a bug in your Dart code
 # ...edit, test locally...
 
-# 3. Create a patch
-shorebird patch android --no-confirm
+# 3. Create a patch (the CLI builds and diffs it for you)
 airbuild codepush flutter patch android \
   --app app_xxx \
   --release-version 1.0.0+1 \
-  --artifact path/to/patch.diff \
   --release-notes "Fixed login crash"
 
 # 4. Promote to 25% of devices
@@ -209,6 +201,6 @@ airbuild codepush flutter rollback \
 ## Limitations
 
 - **Dart code only** — patches can update Dart code, not native code, assets, or the Flutter framework itself
-- **Android first** — auto-detection of the release artifact is supported for Android (`libapp.so`); iOS requires `--artifact`
+- **iOS auto-diff is best-effort** — Android patch creation is fully automatic; iOS may require `--artifact` with a manually created diff in some environments
 - **Same release version** — patches must target an existing release version; you can't patch a version that hasn't been registered
-- **Shorebird runtime required** — your app must be built with the Shorebird runtime embedded; a standard Flutter build won't accept patches
+- **Shorebird runtime required** — your app must be built with the Shorebird updater embedded; a standard Flutter build won't accept patches
