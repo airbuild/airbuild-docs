@@ -88,7 +88,7 @@ airbuild codepush react-native publish \
 | `--channel` | — | `production` | Distribution channel |
 | `--release-notes` | — | — | Release notes |
 | `--output-dir` | — | `dist` | Directory to export to / read from |
-| `--skip-export` | — | `false` | Don't run `npx expo export` — just read `--output-dir` |
+| `--skip-export` | — | `false` | Don't export — just read `--output-dir` |
 
 **Example — skip export, use pre-exported bundle:**
 
@@ -183,7 +183,7 @@ The signing key ensures that devices only install updates that were signed by Ai
 ## Typical workflow
 
 ```bash
-# 1. Publish an update (export + upload)
+# 1. Publish an update
 airbuild codepush react-native publish \
   --app app_xxx \
   --platform android \

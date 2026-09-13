@@ -14,7 +14,7 @@ export default defineConfig({
         dark: './src/assets/logo-dark.png',
         replacesTitle: true,
       },
-      favicon: './src/assets/favicon.png',
+      favicon: '/favicon.png',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/airbuild' },
         { icon: 'discord', label: 'Discord', href: 'https://discord.gg/airbuild' },

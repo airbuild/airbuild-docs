@@ -15,8 +15,8 @@ AirBuild acts as the **control plane** — it stores your releases and patches, 
 
 | Framework | What you push | Build tool |
 | --------- | ------------ | ---------- |
-| **Flutter** | Dart code patches | `airbuild codepush flutter` (wraps the Shorebird CLI) |
-| **React Native** | JS bundle + assets | `airbuild codepush react-native` (wraps `expo export`) |
+| **Flutter** | Dart code patches | `airbuild codepush flutter` |
+| **React Native** | JS bundle + assets | `airbuild codepush react-native` |
 
 Both frameworks share the same dashboard UI — the **OTA Updates** tab on each app's detail page — but use separate CLI commands and have independent feature flags.
 

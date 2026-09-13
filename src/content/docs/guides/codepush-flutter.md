@@ -91,10 +91,10 @@ airbuild codepush flutter patch android \
 | `--architecture` | — | — | Target architecture, e.g. `arm64-v8a` |
 | `--channel` | — | `production` | Distribution channel |
 | `--release-notes` | — | — | Patch notes |
-| `--artifact` | — | auto-diff | Path to a pre-built patch diff (skips auto-diff) |
+| `--artifact` | — | auto | Path to a pre-built patch diff (skips the build step) |
 | `--skip-build` | — | `false` | Don't build — use existing build output or `--artifact` |
 
-> **Note:** Android auto-diff is fully automatic. iOS auto-diff is best-effort; if the CLI can't locate the generated diff, pass `--artifact` with a manually created diff.
+> **Note:** Android patch creation is fully automatic. On iOS, the CLI can't always locate the generated diff — if that happens, pass `--artifact` with a manually created diff.
 
 ### `airbuild codepush flutter promote`
 
@@ -201,6 +201,6 @@ airbuild codepush flutter rollback \
 ## Limitations
 
 - **Dart code only** — patches can update Dart code, not native code, assets, or the Flutter framework itself
-- **iOS auto-diff is best-effort** — Android patch creation is fully automatic; iOS may require `--artifact` with a manually created diff in some environments
+- **iOS patch creation may require `--artifact`** — Android patch creation is fully automatic; iOS may require `--artifact` with a manually created diff in some environments
 - **Same release version** — patches must target an existing release version; you can't patch a version that hasn't been registered
 - **Shorebird runtime required** — your app must be built with the Shorebird updater embedded; a standard Flutter build won't accept patches
