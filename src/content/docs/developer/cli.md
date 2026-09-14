@@ -137,7 +137,6 @@ airbuild push                              # Push release build (auto platform i
 airbuild push --platform android           # Push Android release
 airbuild push --platform ios --debug       # Push iOS debug
 airbuild push --all                        # Push both platforms sequentially
-airbuild push --release --expiry 30        # Push with 30-day link expiry
 airbuild push --json                       # JSON output for CI/CD parsing
 airbuild push --release-notes "Bug fixes"  # Include release notes
 ```
@@ -148,7 +147,6 @@ airbuild push --release-notes "Bug fixes"  # Include release notes
 | `--release`       | Upload the release build                           | yes      |
 | `--debug`         | Upload the debug build                             | no       |
 | `--all`           | Upload all configured platforms                    | no       |
-| `--expiry`        | Install link expiry in days (0 = plan default)     | 0        |
 | `--json`          | Output results as JSON (for CI/CD)                | no       |
 | `--release-notes` | Release notes for this build                       | none     |
 
@@ -244,6 +242,20 @@ Show the current CLI configuration.
 ```bash
 airbuild config show
 ```
+
+### `airbuild config set`
+
+Set the API key or API URL directly without running `airbuild login`. Useful for CI/CD pipelines where interactive login isn't possible.
+
+```bash
+airbuild config set --api-key airbuild_xxxxxxxxxxxx
+airbuild config set --api-url https://airbuild.dev
+```
+
+| Flag        | Description                          | Default                |
+| ----------- | ------------------------------------ | ---------------------- |
+| `--api-key` | API key to authenticate with         | none                   |
+| `--api-url` | AirBuild API base URL                | `https://airbuild.dev` |
 
 ### `airbuild version`
 

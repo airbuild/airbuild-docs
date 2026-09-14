@@ -147,6 +147,7 @@ These endpoints are optimized for CLI and CI/CD usage and require an API key.
 | ------ | --------------------------------- | ------------------------ |
 | GET    | `/api/cli/verify`                 | Verify an API key.       |
 | GET    | `/api/cli/apps`                   | List apps.               |
+| POST   | `/api/cli/apps`                   | Create an app.           |
 | GET    | `/api/cli/apps/{appId}/builds`    | List builds for an app.  |
 | GET    | `/api/cli/links?appId=`           | List links for an app.   |
 | POST   | `/api/cli/links`                  | Create a link.           |
@@ -192,6 +193,41 @@ curl -X POST https://airbuild.dev/api/dl/{slug}/unlock \
   -H "Content-Type: application/json" \
   -d '{"password":"s3cret"}'
 ```
+
+### CodePush (OTA Updates)
+
+These endpoints power the AirBuild CLI's `codepush` commands. All require an API key (`Authorization: Bearer airbuild_xxx`). See the [CodePush guide](../guides/codepush.md) for the full workflow.
+
+#### Flutter
+
+| Method | Path                                           | Description                          |
+| ------ | ---------------------------------------------- | ------------------------------------ |
+| POST   | `/api/codepush/flutter/release`                | Register a release artifact.         |
+| POST   | `/api/codepush/flutter/patch`                  | Create a patch (binary diff).        |
+| POST   | `/api/codepush/flutter/promote`                | Promote a patch to a channel.        |
+| POST   | `/api/codepush/flutter/rollback`               | Roll back the active patch.          |
+| GET    | `/api/codepush/flutter/status`                 | List releases, patches, channels.    |
+| GET    | `/api/codepush/flutter/check`                  | Device polling endpoint.             |
+| GET    | `/api/codepush/flutter/release/download`       | Download a release artifact.         |
+| GET    | `/api/codepush/flutter/patch/{id}/download`     | Download a patch (distribution key).  |
+
+#### React Native
+
+| Method | Path                                           | Description                          |
+| ------ | ---------------------------------------------- | ------------------------------------ |
+| POST   | `/api/codepush/react-native/publish`            | Publish an update (bundle + assets). |
+| POST   | `/api/codepush/react-native/promote`            | Promote an update to a channel.      |
+| POST   | `/api/codepush/react-native/rollback`           | Roll back an update.                 |
+| GET    | `/api/codepush/react-native/status`             | List releases, updates, channels.    |
+| GET    | `/api/codepush/react-native/manifest`           | Device manifest (Expo Updates v1).    |
+| GET    | `/api/codepush/react-native/asset/{id}`         | Download an asset (distribution key). |
+
+#### Signing keys
+
+| Method | Path                                           | Description                          |
+| ------ | ---------------------------------------------- | ------------------------------------ |
+| GET    | `/api/apps/{appId}/codepush/signing-key`        | Get the public signing key.          |
+| POST   | `/api/apps/{appId}/codepush/signing-key`        | Rotate the signing key.              |
 
 ### SDK endpoints
 
