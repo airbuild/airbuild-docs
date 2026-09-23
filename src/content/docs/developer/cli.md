@@ -295,12 +295,91 @@ flags, channels, staged rollout, and instant rollback.
 > admin (Admin → Feature Flags → `codepush_flutter` / `codepush_react_native`).
 > All CodePush endpoints return `403` when the flag is disabled.
 
-### Flutter CodePush
+### CodePush setup commands
 
-Requires the [Shorebird CLI](https://pub.dev/packages/shorebird_cli):
+Before using CodePush, run `doctor` to check your environment, `install` to install missing dependencies, and `init` to configure your project. These commands eliminate the manual setup steps.
+
+#### `airbuild codepush flutter doctor`
+
+Check that all Flutter CodePush dependencies and configuration are in place.
 
 ```bash
-dart pub global activate shorebird_cli
+airbuild codepush flutter doctor
+```
+
+Checks performed:
+- `dart` on PATH
+- `flutter` on PATH
+- `shorebird` CLI installed
+- `shorebird.yaml` exists and points to AirBuild
+- `.airbuild.json` project config exists
+- API key configured
+- AirBuild API reachable
+
+#### `airbuild codepush flutter install`
+
+Install missing Flutter CodePush dependencies.
+
+```bash
+airbuild codepush flutter install
+```
+
+Currently installs:
+- Shorebird CLI (via `dart pub global activate shorebird_cli`)
+
+#### `airbuild codepush flutter init`
+
+Initialize the current project for Flutter CodePush.
+
+```bash
+airbuild codepush flutter init
+```
+
+Creates `shorebird.yaml` with the AirBuild `base_url` if missing, and verifies `.airbuild.json` exists. Run `airbuild init` first if you haven't already.
+
+#### `airbuild codepush react-native doctor`
+
+Check that all React Native CodePush dependencies and configuration are in place.
+
+```bash
+airbuild codepush react-native doctor
+```
+
+Checks performed:
+- `node` and `npx` on PATH
+- `expo-updates` installed in `package.json`
+- `app.json`/`app.config.js` configured with AirBuild manifest URL
+- `.airbuild.json` project config exists
+- API key configured
+- AirBuild API reachable
+
+#### `airbuild codepush react-native install`
+
+Install missing React Native CodePush dependencies.
+
+```bash
+airbuild codepush react-native install
+```
+
+Currently installs:
+- `expo-updates` (via `npx expo install` or `npm install`)
+
+#### `airbuild codepush react-native init`
+
+Initialize the current project for React Native CodePush.
+
+```bash
+airbuild codepush react-native init
+```
+
+Installs `expo-updates` if missing, configures `app.json`/`app.config.js` with the AirBuild manifest URL and `runtimeVersion` policy, and verifies `.airbuild.json` exists.
+
+### Flutter CodePush
+
+Requires the [Shorebird CLI](https://pub.dev/packages/shorebird_cli). The CLI can install it for you:
+
+```bash
+airbuild codepush flutter install
 ```
 
 Your app must be built with the Shorebird updater embedded. See the [Shorebird docs](https://shorebird.dev/) for setup.
@@ -399,7 +478,11 @@ airbuild codepush flutter status
 
 ### React Native CodePush
 
-Requires `expo-updates` in your app and `npx` on your PATH.
+Requires `expo-updates` in your app and `npx` on your PATH. The CLI can install it for you:
+
+```bash
+airbuild codepush react-native install
+```
 
 #### `airbuild codepush react-native publish`
 
@@ -472,7 +555,10 @@ airbuild codepush react-native status
 
 ```bash
 # --- Flutter ---
-airbuild init                                         # one-time: link app
+airbuild codepush flutter doctor                    # check environment
+airbuild codepush flutter install                   # install missing deps
+airbuild codepush flutter init                      # configure project
+airbuild init                                       # one-time: link app
 airbuild codepush flutter release android --version 1.0.0+1
 # ...fix a Dart bug...
 airbuild codepush flutter patch android --release-version 1.0.0+1
@@ -480,7 +566,10 @@ airbuild codepush flutter promote --patch 1 --channel production --rollout 25
 airbuild codepush flutter rollback --patch 1
 
 # --- React Native ---
-airbuild init                                         # one-time: link app
+airbuild codepush react-native doctor               # check environment
+airbuild codepush react-native install              # install missing deps
+airbuild codepush react-native init                 # configure project
+airbuild init                                       # one-time: link app
 airbuild codepush react-native publish --platform android --runtime-version 1.0.0
 airbuild codepush react-native promote --update-id update_xxx --rollout 25
 airbuild codepush react-native rollback --update-id update_xxx

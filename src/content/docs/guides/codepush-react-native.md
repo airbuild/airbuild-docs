@@ -11,16 +11,21 @@ React Native CodePush lets you push **JS bundle updates** to your React Native a
 
 - An AirBuild account with the `codepush_react_native` feature flag enabled for your organization
 - The [AirBuild CLI](/developer/cli/) installed
-- Node.js and `npx` available on your PATH
-- `expo-updates` installed in your React Native app:
+- Node.js and `npx` available on your PATH ([install guide](https://nodejs.org/))
+- Your React Native app (Expo-managed or bare)
 
-  ```bash
-  # For Expo apps
-  npx expo install expo-updates
+The AirBuild CLI can install `expo-updates` and configure your project automatically:
 
-  # For bare React Native apps
-  npm install expo-updates
-  ```
+```bash
+# Check what's needed
+airbuild codepush react-native doctor
+
+# Install missing dependencies (e.g. expo-updates)
+airbuild codepush react-native install
+
+# Initialize project (installs expo-updates + configures app.json/app.config.js)
+airbuild codepush react-native init
+```
 
 ## How it works
 
@@ -41,7 +46,9 @@ This generates a distribution key for your app. You'll need this for the `expo-u
 
 ## Configure expo-updates in your app
 
-Add the following to your `app.json` (Expo) or `app.config.js`:
+Run `airbuild codepush react-native init` to automatically configure your project — it installs `expo-updates` if missing and sets `updates.url` in `app.json`/`app.config.js` to point to AirBuild.
+
+If you prefer to configure manually, add the following to your `app.json` (Expo) or `app.config.js`:
 
 ```json
 {

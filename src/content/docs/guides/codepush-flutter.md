@@ -11,13 +11,21 @@ Flutter CodePush lets you push **Dart-only code patches** to your Flutter app wi
 
 - An AirBuild account with the `codepush_flutter` feature flag enabled for your organization
 - The [AirBuild CLI](/developer/cli/) installed
-- The [Shorebird CLI](https://pub.dev/packages/shorebird_cli) installed:
-
-  ```bash
-  dart pub global activate shorebird_cli
-  ```
-
+- Dart and Flutter SDK installed ([install guide](https://docs.flutter.dev/get-started/install))
 - Your Flutter app built with the Shorebird updater embedded (see the [Shorebird docs](https://shorebird.dev/) for setup)
+
+The AirBuild CLI can install the Shorebird CLI and configure your project automatically:
+
+```bash
+# Check what's needed
+airbuild codepush flutter doctor
+
+# Install missing dependencies (e.g. Shorebird CLI)
+airbuild codepush flutter install
+
+# Initialize project (creates shorebird.yaml with AirBuild config)
+airbuild codepush flutter init
+```
 
 ## How it works
 
@@ -154,10 +162,13 @@ Output shows channels, releases, and for each release its patches with status, r
 
 ## Device-side configuration
 
-The Shorebird updater in your app needs to point to AirBuild to check for updates. Configure the updater with your app's distribution key:
+Run `airbuild codepush flutter init` to automatically configure your project — it creates `shorebird.yaml` with the AirBuild `base_url` so the Shorebird updater checks AirBuild for updates.
 
-- **Check URL:** `https://airbuild.dev/api/codepush/flutter/check?key=<distribution_key>`
-- **Download URL:** `https://airbuild.dev/api/codepush/flutter/patch/<id>/download?key=<distribution_key>`
+If you prefer to configure manually, add this to your `shorebird.yaml`:
+
+```yaml
+base_url: https://airbuild.dev
+```
 
 The distribution key is available on the app's OTA Updates tab in the dashboard.
 

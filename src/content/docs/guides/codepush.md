@@ -104,6 +104,11 @@ The **OTA Updates** tab on each app's detail page shows:
 All CodePush operations are available via the AirBuild CLI under the `codepush` subcommand:
 
 ```bash
+# Setup commands (both frameworks)
+airbuild codepush <framework> doctor     # Check environment
+airbuild codepush <framework> install    # Install missing dependencies
+airbuild codepush <framework> init       # Configure project for CodePush
+
 # Flutter commands
 airbuild codepush flutter release <android|ios> [flags]
 airbuild codepush flutter patch <android|ios> [flags]
