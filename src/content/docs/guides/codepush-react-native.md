@@ -17,6 +17,10 @@ React Native CodePush lets you push **JS bundle updates** to your React Native a
 The AirBuild CLI can install `expo-updates` and configure your project automatically:
 
 ```bash
+# One-time: authenticate and link this project to an app (creates .airbuild.json)
+airbuild login --api-key airbuild_xxx
+airbuild init
+
 # Check what's needed
 airbuild codepush react-native doctor
 
@@ -46,7 +50,7 @@ This generates a distribution key for your app. You'll need this for the `expo-u
 
 ## Configure expo-updates in your app
 
-Run `airbuild codepush react-native init` to automatically configure your project — it installs `expo-updates` if missing and sets `updates.url` in `app.json`/`app.config.js` to point to AirBuild.
+Run `airbuild codepush react-native init` to automatically configure your project — it installs `expo-updates` if missing and sets `updates.url` (with your distribution key) in `app.json`. If the project uses `app.config.js`/`app.config.ts`, it prints the snippet to add yourself.
 
 If you prefer to configure manually, add the following to your `app.json` (Expo) or `app.config.js`:
 
@@ -54,9 +58,9 @@ If you prefer to configure manually, add the following to your `app.json` (Expo)
 {
   "expo": {
     "updates": {
-      "url": "https://airbuild.dev/api/codepush/react-native/manifest",
+      "url": "https://airbuild.dev/api/codepush/react-native/manifest?key=your-distribution-key",
       "requestHeaders": {
-        "AirBuild-Key": "your-distribution-key"
+        "expo-channel-name": "production"
       },
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
@@ -67,6 +71,8 @@ If you prefer to configure manually, add the following to your `app.json` (Expo)
   }
 }
 ```
+
+The distribution key goes in the `?key=` query parameter — it's a public identifier that's safe to embed in your app binary.
 
 > **Important:** The `runtimeVersion` must match the `--runtime-version` you pass to the CLI. If you use `"policy": "appVersion"`, the runtime version will be your app's version string (e.g. `1.0.0`). A new binary build (with a new version) creates a new runtime version — updates published for the old runtime version won't apply to the new binary.
 
@@ -176,10 +182,7 @@ Configure `expo-updates` to verify update signatures by adding the public key to
 {
   "expo": {
     "updates": {
-      "url": "https://airbuild.dev/api/codepush/react-native/manifest",
-      "requestHeaders": {
-        "AirBuild-Key": "your-distribution-key"
-      }
+      "url": "https://airbuild.dev/api/codepush/react-native/manifest?key=your-distribution-key"
     }
   }
 }

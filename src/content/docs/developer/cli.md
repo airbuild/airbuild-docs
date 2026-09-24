@@ -299,6 +299,9 @@ flags, channels, staged rollout, and instant rollback.
 
 Before using CodePush, run `doctor` to check your environment, `install` to install missing dependencies, and `init` to configure your project. These commands eliminate the manual setup steps.
 
+- `doctor` is read-only and exits non-zero if any check fails, so it's safe to use in CI.
+- `install` and `init` ask for confirmation before changing anything; pass `--yes` (`-y`) to skip the prompt in automation.
+
 #### `airbuild codepush flutter doctor`
 
 Check that all Flutter CodePush dependencies and configuration are in place.
@@ -321,7 +324,8 @@ Checks performed:
 Install missing Flutter CodePush dependencies.
 
 ```bash
-airbuild codepush flutter install
+airbuild codepush flutter install          # asks before installing
+airbuild codepush flutter install --yes    # no prompt (CI)
 ```
 
 Currently installs:
@@ -335,7 +339,7 @@ Initialize the current project for Flutter CodePush.
 airbuild codepush flutter init
 ```
 
-Creates `shorebird.yaml` with the AirBuild `base_url` if missing, and verifies `.airbuild.json` exists. Run `airbuild init` first if you haven't already.
+Creates or updates `shorebird.yaml` so the Shorebird updater checks AirBuild: sets `base_url` and your app's `distribution_key`, and adds `app_id` if missing. Run `airbuild init` first if you haven't already.
 
 #### `airbuild codepush react-native doctor`
 
@@ -358,11 +362,12 @@ Checks performed:
 Install missing React Native CodePush dependencies.
 
 ```bash
-airbuild codepush react-native install
+airbuild codepush react-native install          # asks before installing
+airbuild codepush react-native install --yes    # no prompt (CI)
 ```
 
 Currently installs:
-- `expo-updates` (via `npx expo install` or `npm install`)
+- `expo-updates` (via `npx expo install` for Expo projects, `npm install` for bare React Native)
 
 #### `airbuild codepush react-native init`
 
@@ -372,7 +377,7 @@ Initialize the current project for React Native CodePush.
 airbuild codepush react-native init
 ```
 
-Installs `expo-updates` if missing, configures `app.json`/`app.config.js` with the AirBuild manifest URL and `runtimeVersion` policy, and verifies `.airbuild.json` exists.
+Installs `expo-updates` if missing and sets `expo.updates.url` + `expo.updates.runtimeVersion` in `app.json` to your app's AirBuild manifest URL. If the project uses `app.config.js`/`app.config.ts` instead, it prints the snippet to add yourself. Run `airbuild init` first if you haven't already.
 
 ### Flutter CodePush
 
@@ -555,10 +560,11 @@ airbuild codepush react-native status
 
 ```bash
 # --- Flutter ---
+airbuild login                                      # one-time: authenticate
+airbuild init                                       # one-time: link app (creates .airbuild.json)
 airbuild codepush flutter doctor                    # check environment
 airbuild codepush flutter install                   # install missing deps
 airbuild codepush flutter init                      # configure project
-airbuild init                                       # one-time: link app
 airbuild codepush flutter release android --version 1.0.0+1
 # ...fix a Dart bug...
 airbuild codepush flutter patch android --release-version 1.0.0+1
@@ -566,10 +572,11 @@ airbuild codepush flutter promote --patch 1 --channel production --rollout 25
 airbuild codepush flutter rollback --patch 1
 
 # --- React Native ---
+airbuild login                                      # one-time: authenticate
+airbuild init                                       # one-time: link app (creates .airbuild.json)
 airbuild codepush react-native doctor               # check environment
 airbuild codepush react-native install              # install missing deps
 airbuild codepush react-native init                 # configure project
-airbuild init                                       # one-time: link app
 airbuild codepush react-native publish --platform android --runtime-version 1.0.0
 airbuild codepush react-native promote --update-id update_xxx --rollout 25
 airbuild codepush react-native rollback --update-id update_xxx
