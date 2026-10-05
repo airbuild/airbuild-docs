@@ -172,11 +172,17 @@ If you prefer to configure manually, add this to your `shorebird.yaml` (your app
 
 ```yaml
 app_id: <your-app-id>
-base_url: https://airbuild.dev/api/codepush/flutter
+base_url: https://airbuild.dev
 distribution_key: dk_xxx
 channel: production
 auto_update: true
 ```
+
+`base_url` is the bare AirBuild origin — the Shorebird updater calls
+`{base_url}/api/v1/patches/check` and `{base_url}/api/v1/patches/events`
+(the same wire protocol it uses with Shorebird's own backend). Configs
+written with the older `base_url: https://airbuild.dev/api/codepush/flutter`
+continue to work via server-side compatibility routes.
 
 ## Typical workflow
 
@@ -214,6 +220,17 @@ airbuild codepush flutter rollback \
   --app app_xxx \
   --patch 1
 ```
+
+## Patch integrity & signing
+
+Every check response includes `patch.hash` (SHA-256), which the Shorebird updater always verifies before applying a patch — corrupted or mismatched artifacts are rejected on-device automatically.
+
+For stronger protection, the response also carries `patch.hash_signature` (an RSA signature over the hash). To enforce it on-device, embed the org's public key — shown on the app's **OTA Updates → Integration** card — either via `patch_public_key` in `shorebird.yaml` or `shorebird release --public-key-path`. Devices without an embedded key skip signature verification.
+
+## Rollback & auto-pause
+
+- Rolling back a patch (`airbuild codepush flutter rollback`) reports its patch number via `rolled_back_patch_numbers`, so devices that already installed it revert automatically.
+- The dashboard shows per-patch install success/failure counts and crash-free rate. If the observed install-failure rate crosses the auto-pause threshold, the patch stops being served until you adjust the rollout (which resumes it).
 
 ## Limitations
 
