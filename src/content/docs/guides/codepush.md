@@ -59,6 +59,8 @@ CodePush uses **channels** to control which updates go to which devices:
 - **`staging`** — for internal testing before promoting to production
 - Custom channels — create as many as you need
 
+> **Flutter note:** the `channel:` key in `shorebird.yaml` is stripped at build time — the compiled updater always checks `stable`, which AirBuild maps to `production`. To receive patches from `staging` or a custom channel on a device, set `auto_update: false` in `shorebird.yaml` and check manually via the Flutter SDK's `AirBuildCodePush(defaultChannel: 'staging')`. React Native devices select their channel via the `expo-channel-name` header configured in `app.json`.
+
 ### Staged rollout
 
 When you promote a patch/update to a channel, you can specify a **rollout percentage** (0–100). AirBuild uses a deterministic hash of the device ID to decide whether a device receives the update, ensuring stable rollout — a device that gets the update will keep it, and a device that doesn't will get it once you increase the percentage.
@@ -136,11 +138,19 @@ All CodePush endpoints require an API key (`Authorization: Bearer airbuild_xxx`)
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
-| `POST` | `/api/codepush/flutter/release` | Register a release |
-| `POST` | `/api/codepush/flutter/patch` | Create a patch |
+| `POST` | `/api/codepush/flutter/release` | Register a release (per-architecture artifacts) |
+| `POST` | `/api/codepush/flutter/patch` | Create a patch (per-architecture diffs) |
 | `POST` | `/api/codepush/flutter/promote` | Promote a patch to a channel |
 | `POST` | `/api/codepush/flutter/rollback` | Rollback a patch |
-| `GET` | `/api/codepush/flutter/status?appId=xxx` | List releases and patches |
+| `GET` | `/api/codepush/flutter/status?appId=xxx` | List releases, patches, and metrics |
+| `GET` | `/api/codepush/flutter/signing-key` | Org RSA public key material (for `SHOREBIRD_PUBLIC_KEY`) |
+
+Device-facing endpoints (Shorebird wire protocol — called by the updater compiled into the app, not by you):
+
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| `POST` | `/api/v1/patches/check` | Patch check — returns patch availability, download URL, hash, `hash_signature`, `rolled_back_patch_numbers` |
+| `POST` | `/api/v1/patches/events` | Install telemetry — feeds metrics and crash-rate auto-pause |
 
 ### React Native endpoints
 

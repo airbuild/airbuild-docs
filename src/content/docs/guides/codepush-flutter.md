@@ -1,240 +1,269 @@
 ---
 title: Flutter CodePush
-description: Push Dart code patches to Flutter apps without a store re-submission, with staged rollout and rollback.
+description: Push Dart code patches to Flutter apps without a store re-submission, with staged rollout, signing, and rollback.
 ---
 
 # Flutter CodePush
 
-Flutter CodePush lets you push **Dart-only code patches** to your Flutter app without a full store re-submission. Ship bug fixes and small tweaks in minutes, with staged rollout and instant rollback.
+Flutter CodePush lets you push **Dart-only code patches** to your Flutter app without a full store re-submission. Ship bug fixes and small tweaks in minutes, with staged rollout, on-device signature verification, and instant rollback.
+
+AirBuild is the **control plane** — releases, patches, channels, rollouts, and metrics — while the on-device patching is done by Shorebird's open-source updater runtime. Your app never talks to Shorebird's cloud; everything goes through your AirBuild server. **No Shorebird account is needed at any point.**
+
+## When to use CodePush — and when not to
+
+**CodePush works for:**
+
+- Dart code changes — bug fixes, UI tweaks, copy changes, logic fixes
+- Anything that compiles into the Dart snapshot: `lib/` changes, pubspec Dart dependency updates, `--dart-define` constants
+- Both Android (APK/AAB, all ABIs) and iOS
+
+**CodePush does NOT work for:**
+
+- **Native code** — Kotlin/Java/Swift/Objective-C changes, new permissions, `AndroidManifest.xml`/`Info.plist` edits
+- **Assets** — images, fonts, `.env` files, anything in `pubspec.yaml`'s `assets:` section or platform asset folders
+- **Flutter/engine upgrades** — patches must be built on the same Flutter engine revision as the release
+- **Plugins with native parts** — adding/upgrading a plugin whose Dart API is fine but that ships new native code won't deliver the native half
+
+The CLI detects these at patch time and **warns** (native/asset/engine diffs are listed before upload), but the patch still ships — the unpatchable parts simply won't reach devices. Treat the warning as "this needs a new build + release", not "blocked".
+
+**Rule of thumb:** if `git diff` touches anything outside `lib/` and Dart dependencies, ship a new binary build instead of a patch.
 
 ## Prerequisites
 
 - An AirBuild account with the `codepush_flutter` feature flag enabled for your organization
-- The [AirBuild CLI](/developer/cli/) installed
-- Dart and Flutter SDK installed ([install guide](https://docs.flutter.dev/get-started/install))
-- Your Flutter app built with the Shorebird updater embedded (see the [Shorebird docs](https://shorebird.dev/) for setup)
+- The [AirBuild CLI](/developer/cli/) installed and authenticated (`airbuild login --api-key airbuild_xxx`)
+- A Flutter project (the AirBuild CLI installs its own Shorebird toolchain — no Shorebird account needed)
+- Java 17+ for Android builds (e.g. Android Studio's bundled JBR); Xcode for iOS builds
 
-The AirBuild CLI can install the Shorebird CLI and configure your project automatically:
+## Setup (one-time per project)
 
 ```bash
-# One-time: authenticate and link this project to an app (creates .airbuild.json)
 airbuild login --api-key airbuild_xxx
-airbuild init
-
-# Check what's needed
-airbuild codepush flutter doctor
-
-# Install missing dependencies (e.g. Shorebird CLI)
-airbuild codepush flutter install
-
-# Initialize project (creates shorebird.yaml with AirBuild config)
-airbuild codepush flutter init
+airbuild init                              # links project → creates .airbuild.json
+airbuild codepush flutter doctor           # verify environment
+airbuild codepush flutter install          # install Shorebird toolchain to ~/.shorebird
+airbuild codepush flutter init             # write shorebird.yaml + add it to pubspec assets
 ```
 
-## How it works
+`init` writes `shorebird.yaml` with your `app_id`, `base_url`, `distribution_key`, `channel`, and `auto_update`, and adds the file to `pubspec.yaml`'s `flutter.assets` so it's bundled into your app.
 
-1. You register a release with AirBuild (the CLI builds it for you)
-2. You fix a bug in your Dart code
-3. You create a patch with AirBuild (the CLI builds and diffs it for you)
-4. Devices check AirBuild for updates and download the patch on next launch
-5. You control rollout via channels and percentages
+## The update lifecycle
 
-## Enable CodePush for your app
+1. **`release`** — builds your app and registers the release artifacts with AirBuild. Install this exact build on devices.
+2. **`patch`** — you change Dart code; the CLI rebuilds, diffs against the release artifacts, and uploads the diff as a draft.
+3. **`promote`** — activates the patch on a channel at a rollout percentage.
+4. **Devices** — the embedded updater checks AirBuild on app launch (or when your code asks), downloads the diff, verifies hash + signature, and applies it on the next launch.
+5. **`rollback`** — stops serving a patch and tells already-patched devices to revert.
 
-1. Go to your app's detail page in the AirBuild dashboard
-2. Click **"Enable OTA Updates"** in the sidebar
-3. Select **Flutter**
-4. Click **Enable**
-
-This generates a distribution key for your app. You'll need this for the device-side updater configuration.
-
-## CLI commands
-
-### `airbuild codepush flutter release`
-
-Register a Flutter release. The CLI builds the release locally and uploads it to AirBuild.
+### Release
 
 ```bash
-airbuild codepush flutter release android \
-  --app app_xxx \
-  --version 1.0.0+1 \
-  --channel production
+airbuild codepush flutter release android --version 1.0.0+1
+airbuild codepush flutter release ios     --version 1.0.0+1
 ```
+
+- **Android:** builds `app-release.apk` (or `.aab` with `--format aab`), extracts `libapp.so` for every ABI present (typically `arm64-v8a`, `armeabi-v7a`, `x86_64`), and uploads them all under one release.
+- **iOS:** builds a **signed** `.app`, zips the `App` binary plus its link supplements, and uploads. **Install this exact `.app` on devices** — an AOT snapshot from a different build can never be patched (the diff base won't match). Re-signing the same `.app` later is safe; recompiling is not. Use `--no-codesign` only when a CI step signs that same binary afterwards.
+
+### Patch
+
+```bash
+# change Dart code, then:
+airbuild codepush flutter patch android --release-version 1.0.0+1
+airbuild codepush flutter patch ios     --release-version 1.0.0+1
+```
+
+- Android: builds the APK, diffs each ABI's `libapp.so` against the release, uploads all diffs as **one** patch.
+- iOS: builds the app, runs the full local pipeline (`app.dill` → `gen_snapshot` → `aot-tools link` → `dump_blobs` → binary diff) — fully automatic, same as Android.
+- The patch is created as a **DRAFT at 0% rollout** — nothing reaches devices until you promote it.
+
+### Promote
+
+```bash
+airbuild codepush flutter promote \
+  --release-version 1.0.0+1 --platform android \
+  --patch 1 --channel production --rollout 25
+```
+
+Rollouts are **deterministic** — each device hashes into a stable bucket, so the same device gets the same verdict on every check-in, and ramping 25% → 100% cleanly adds the remaining devices. Re-promoting the same patch changes only the rollout percentage.
+
+### Rollback
+
+```bash
+airbuild codepush flutter rollback \
+  --release-version 1.0.0+1 --platform android --patch 1
+```
+
+The patch stops being served immediately and its number is broadcast in `rolled_back_patch_numbers`, so devices that already installed it revert to the base release on their next launch.
+
+### Status
+
+```bash
+airbuild codepush flutter status
+```
+
+Lists releases, patches, channels, rollout %, and metrics (check-ins, downloads, installs, install failures) per patch.
+
+## Channels
+
+Every app has `production` and `staging` by default; custom channels are created implicitly by promoting to a new name.
+
+**Important:** the `channel:` key in `shorebird.yaml` is **stripped at build time** by the Shorebird toolchain — the compiled-in updater always reports `stable`, which AirBuild maps to `production`. So:
+
+- **Automatic updates always come from production.** You cannot point a device at staging via the yaml.
+- **To test staging on a device**, use the [Flutter SDK](/developer/sdks/) with `auto_update: false` and manual checks:
+
+```yaml
+# shorebird.yaml — manual update mode
+auto_update: false
+```
+
+```dart
+final codePush = AirBuildCodePush(defaultChannel: 'staging');
+final status = await codePush.checkForUpdate();
+if (status == UpdateStatus.outdated) await codePush.update();
+```
+
+With `auto_update: false` the engine's boot thread does nothing — `checkForUpdate`/`update` are the only update path, and the channel name is sent verbatim to the server (`"staging"`, `"internal-qa"`, anything you promote to).
+
+## Patch signing
+
+Every patch response carries `hash_signature` (RSA-PKCS1v15-SHA256 over the artifact hash). The CLI **automatically** fetches your org's public key at build time and injects it via `SHOREBIRD_PUBLIC_KEY` — builds made through `airbuild codepush flutter release|patch` verify patch signatures on-device by default. Devices built without the key skip signature checks (hash integrity still applies).
+
+> **Gotcha:** the Gradle daemon caches its environment. If a signing key was just added/rotated, run `cd android && ./gradlew --stop` before rebuilding, or the build won't see the new `SHOREBIRD_PUBLIC_KEY`.
+
+## Multi-architecture support
+
+Android fat builds ship `libapp.so` per ABI. Release registers all detected ABIs (shown as `Architectures: arm64-v8a, armeabi-v7a, x86_64`), and each patch carries one diff per ABI. Devices automatically receive the diff matching their architecture; unsupported architectures get no patch. Use `--architecture` to restrict to a single ABI.
+
+## --dart-define support
+
+Both `release` and `patch` forward `--dart-define` and `--dart-define-from-file` to `flutter build`:
+
+```bash
+airbuild codepush flutter release android --version 1.0.0+1 \
+  --dart-define=API_URL=https://api.example.com \
+  --dart-define-from-file=env.json    # JSON object: {"KEY":"value"}
+```
+
+Dart-define constants compile into `libapp.so`, so they **are patchable** — a patch can change them on devices. The CLI records the release's define set (value hashes only — secrets are never persisted) and **warns if a patch's defines drift** (`+added`, `~changed`, `-reverts to default`), since a patch built without a define silently reverts it to the `fromEnvironment` default.
+
+## Safety nets
+
+- **Boundary detection** — the CLI fingerprints the packaged release and warns at patch time when native code, assets, or the engine differ (i.e. things a patch can't deliver).
+- **dart-define drift** — warns when patch defines differ from the release's.
+- **Metrics** — per-patch check-ins, downloads, successful installs, and install failures (from `/api/v1/patches/events`).
+- **Auto-pause** — once ≥10 install reports exist for a patch, a ≥30% failure rate auto-pauses it: it stops being served, downloads return 410, and a webhook + audit entry fire. Re-promoting resets it.
+- **Rollback** — device-side revert via `rolled_back_patch_numbers`.
+- **Bad-patch memory** — the updater remembers a patch that failed to apply and skips it on future launches.
+
+## CLI reference
+
+### `airbuild codepush flutter release <android|ios>`
 
 | Flag | Required | Default | Description |
 | ---- | -------- | ------- | ----------- |
-| `--app` | ✓ | — | App ID |
+| `--app` | — | `.airbuild.json` | App ID |
 | `--version` | ✓ | — | App version, e.g. `1.0.0+1` |
-| `--architecture` | — | auto | Target architecture, e.g. `arm64-v8a` (Android) |
-| `--channel` | — | `production` | Distribution channel |
-| `--flutter-revision` | — | — | Flutter SDK version used to build |
+| `--channel` | — | `production` | Channel to register the release under |
+| `--architecture` | — | all detected | Restrict to one ABI, e.g. `arm64-v8a` |
+| `--format` | — | `apk` | Android build format: `apk` or `aab` |
+| `--flutter-revision` | — | detected | Flutter SDK revision used to build |
 | `--shorebird-app-id` | — | — | Shorebird app_id, if tracking one |
 | `--release-notes` | — | — | Release notes |
-| `--artifact` | — | auto-detect | Path to a pre-built release artifact (skips the build step) |
-| `--skip-build` | — | `false` | Don't build — just upload `--artifact` |
+| `--artifact` | — | auto-detect | Pre-built artifact (skips the build) |
+| `--skip-build` | — | `false` | Don't build — upload `--artifact`/detected output |
+| `--no-codesign` | — | `false` | iOS: build unsigned (CI re-signs the same `.app` later) |
+| `--dart-define` | — | — | `KEY=VALUE` compile-time constant (repeatable) |
+| `--dart-define-from-file` | — | — | JSON file of dart-define values (repeatable) |
 
-**Example — upload a pre-built artifact:**
-
-```bash
-airbuild codepush flutter release android \
-  --app app_xxx \
-  --version 1.0.0+1 \
-  --artifact path/to/release.artifact \
-  --skip-build
-```
-
-### `airbuild codepush flutter patch`
-
-Create a Flutter patch. The CLI builds your patched app, computes a diff against the release, and uploads the diff to AirBuild — no manual diffing required.
-
-```bash
-# 1. Fix your Dart bug
-# 2. Create and upload the patch
-airbuild codepush flutter patch android \
-  --app app_xxx \
-  --release-version 1.0.0+1 \
-  --release-notes "Fixed login crash on Android 14"
-```
+### `airbuild codepush flutter patch <android|ios>`
 
 | Flag | Required | Default | Description |
 | ---- | -------- | ------- | ----------- |
-| `--app` | ✓ | — | App ID |
-| `--release-version` | ✓ | — | The release version this patch targets |
-| `--architecture` | — | — | Target architecture, e.g. `arm64-v8a` |
-| `--channel` | — | `production` | Distribution channel |
+| `--app` | — | `.airbuild.json` | App ID |
+| `--release-version` | ✓ | — | Release version this patch targets |
+| `--channel` | — | `production` | Channel the release was registered under |
+| `--architecture` | — | all | Restrict diff to one ABI |
 | `--release-notes` | — | — | Patch notes |
-| `--artifact` | — | auto | Path to a pre-built patch diff (skips the build step) |
-| `--skip-build` | — | `false` | Don't build — use existing build output or `--artifact` |
-
-> **Note:** Android patch creation is fully automatic. On iOS, the CLI can't always locate the generated diff — if that happens, pass `--artifact` with a manually created diff.
+| `--artifact` | — | auto-diff | Pre-built diff file |
+| `--artifact-sha256` | with `--artifact` | — | sha256 of the *patched* artifact (what devices verify) |
+| `--skip-build` | — | `false` | Diff from existing build output, don't rebuild |
+| `--dart-define` | — | — | `KEY=VALUE` constant (repeatable) |
+| `--dart-define-from-file` | — | — | JSON file of dart-define values (repeatable) |
 
 ### `airbuild codepush flutter promote`
 
-Promote a patch to a channel at a specific rollout percentage.
-
-```bash
-# Promote to 25% of production devices
-airbuild codepush flutter promote \
-  --app app_xxx \
-  --patch 1 \
-  --channel production \
-  --rollout 25
-```
-
 | Flag | Required | Default | Description |
 | ---- | -------- | ------- | ----------- |
-| `--app` | ✓ | — | App ID |
-| `--update-id` | — | — | Update ID (alternative to patch number) |
-| `--release-version` | — | — | Release version (with `--platform` and `--patch`) |
-| `--platform` | — | — | `ANDROID` or `IOS` |
-| `--patch` | — | — | Patch number (from `status`) |
+| `--app` | — | `.airbuild.json` | App ID |
+| `--update-id` | — | — | Update ID (alternative lookup) |
+| `--release-version` + `--platform` + `--patch` | — | — | Identify the patch by number |
 | `--channel` | — | `production` | Channel to promote to |
 | `--rollout` | — | `100` | Rollout percentage (0–100) |
 
 ### `airbuild codepush flutter rollback`
 
-Rollback a patch. Devices will revert to the previous version on their next check-in.
-
-```bash
-airbuild codepush flutter rollback \
-  --app app_xxx \
-  --patch 1
-```
-
 | Flag | Required | Default | Description |
 | ---- | -------- | ------- | ----------- |
-| `--app` | ✓ | — | App ID |
-| `--update-id` | — | — | Update ID (alternative to patch number) |
-| `--release-version` | — | — | Release version |
-| `--platform` | — | — | `ANDROID` or `IOS` |
-| `--patch` | — | — | Patch number |
+| `--app` | — | `.airbuild.json` | App ID |
+| `--update-id` | — | — | Update ID (alternative lookup) |
+| `--release-version` + `--platform` + `--patch` | — | — | Identify the patch |
 | `--channel` | — | `production` | Channel |
 
-### `airbuild codepush flutter status`
+### Setup commands
 
-Show all releases and patches for an app.
-
-```bash
-airbuild codepush flutter status --app app_xxx
-```
-
-| Flag | Required | Default | Description |
-| ---- | -------- | ------- | ----------- |
-| `--app` | ✓ | — | App ID |
-
-Output shows channels, releases, and for each release its patches with status, rollout %, channel, and creation date.
-
-## Device-side configuration
-
-Run `airbuild codepush flutter init` to automatically configure your project — it writes `shorebird.yaml` with the AirBuild `base_url` and your app's `distribution_key` so the Shorebird updater checks AirBuild for updates.
-
-If you prefer to configure manually, add this to your `shorebird.yaml` (your app's exact values are on the **OTA Updates** tab in the dashboard):
-
-```yaml
-app_id: <your-app-id>
-base_url: https://airbuild.dev
-distribution_key: dk_xxx
-channel: production
-auto_update: true
-```
-
-`base_url` is the bare AirBuild origin — the Shorebird updater calls
-`{base_url}/api/v1/patches/check` and `{base_url}/api/v1/patches/events`
-(the same wire protocol it uses with Shorebird's own backend). Configs
-written with the older `base_url: https://airbuild.dev/api/codepush/flutter`
-continue to work via server-side compatibility routes.
+| Command | Description |
+| ------- | ----------- |
+| `airbuild codepush flutter doctor` | Verify toolchain, config, API reachability |
+| `airbuild codepush flutter install [--yes]` | Install the Shorebird toolchain to `~/.shorebird` |
+| `airbuild codepush flutter init` | Write `shorebird.yaml` + add it to `pubspec.yaml` assets |
 
 ## Typical workflow
 
 ```bash
-# 1. Register a release (first time or new version)
-airbuild codepush flutter release android \
-  --app app_xxx \
-  --version 1.0.0+1
+# 1. Register the release — install this exact build on devices
+airbuild codepush flutter release android --version 1.0.0+1
 
-# 2. Fix a bug in your Dart code
-# ...edit, test locally...
-
-# 3. Create a patch (the CLI builds and diffs it for you)
-airbuild codepush flutter patch android \
-  --app app_xxx \
-  --release-version 1.0.0+1 \
+# 2. Fix a bug in Dart code, then create the patch (draft at 0%)
+airbuild codepush flutter patch android --release-version 1.0.0+1 \
   --release-notes "Fixed login crash"
 
-# 4. Promote to 25% of devices
-airbuild codepush flutter promote \
-  --app app_xxx \
-  --patch 1 \
-  --channel production \
-  --rollout 25
+# 3. Stage it
+airbuild codepush flutter promote --release-version 1.0.0+1 --platform android \
+  --patch 1 --channel staging --rollout 100
+# verify on a device via the SDK's manual staging channel...
 
-# 5. Monitor — increase rollout if no issues
-airbuild codepush flutter promote \
-  --app app_xxx \
-  --patch 1 \
-  --channel production \
-  --rollout 100
+# 4. Canary, then ramp
+airbuild codepush flutter promote --release-version 1.0.0+1 --platform android \
+  --patch 1 --channel production --rollout 25
+airbuild codepush flutter promote --release-version 1.0.0+1 --platform android \
+  --patch 1 --channel production --rollout 100
 
-# 6. Rollback if something goes wrong
-airbuild codepush flutter rollback \
-  --app app_xxx \
-  --patch 1
+# 5. Or roll back instantly
+airbuild codepush flutter rollback --release-version 1.0.0+1 --platform android --patch 1
 ```
 
-## Patch integrity & signing
+## shorebird.yaml reference
 
-Every check response includes `patch.hash` (SHA-256), which the Shorebird updater always verifies before applying a patch — corrupted or mismatched artifacts are rejected on-device automatically.
+Only these keys survive into the compiled app — everything else is stripped at build time:
 
-For stronger protection, the response also carries `patch.hash_signature` (an RSA signature over the hash). To enforce it on-device, embed the org's public key — shown on the app's **OTA Updates → Integration** card — either via `patch_public_key` in `shorebird.yaml` or `shorebird release --public-key-path`. Devices without an embedded key skip signature verification.
+| Key | Effect |
+| --- | ------ |
+| `app_id` | Your AirBuild app ID (required) |
+| `base_url` | Your AirBuild origin — the updater calls `{base_url}/api/v1/patches/check` |
+| `auto_update` | `true` (default): engine auto-checks `stable`→production at launch. `false`: no boot check — drive updates from Dart (required for channel selection) |
+| `patch_verification` | Optional Shorebird verifier flag, passed through if set |
+| `patch_public_key` | **Not read from the yaml** — injected from `SHOREBIRD_PUBLIC_KEY` env at build time (the CLI does this automatically) |
+| `channel`, `distribution_key` | Stripped — informational only |
 
-## Rollback & auto-pause
+## Troubleshooting
 
-- Rolling back a patch (`airbuild codepush flutter rollback`) reports its patch number via `rolled_back_patch_numbers`, so devices that already installed it revert automatically.
-- The dashboard shows per-patch install success/failure counts and crash-free rate. If the observed install-failure rate crosses the auto-pause threshold, the patch stops being served until you adjust the rollout (which resumes it).
-
-## Limitations
-
-- **Dart code only** — patches can update Dart code, not native code, assets, or the Flutter framework itself
-- **iOS patch creation may require `--artifact`** — Android patch creation is fully automatic; iOS may require `--artifact` with a manually created diff in some environments
-- **Same release version** — patches must target an existing release version; you can't patch a version that hasn't been registered
-- **Shorebird runtime required** — your app must be built with the Shorebird updater embedded; a standard Flutter build won't accept patches
+| Symptom | Likely cause |
+| ------- | ------------ |
+| Patch never arrives on device | Patch is still a DRAFT — promote it. Or the device isn't in the rollout bucket — check `status` metrics |
+| "Update rejected: hash mismatch" | Release artifact ≠ the binary installed on the device. Re-register the release from the exact build you installed |
+| iOS patch won't apply | The installed `.app` came from a different compilation — always install the `.app` produced by `release ios` |
+| Warning about `classes.dex`/assets | A non-Dart change snuck into the patch — the warning lists the files; ship a new build for those changes |
+| Channel check returns nothing | `channel:` in `shorebird.yaml` is stripped — use `AirBuildCodePush` + `auto_update: false` for non-production channels |
+| Signature not verified | Build ran before `SHOREBIRD_PUBLIC_KEY` was visible — `cd android && ./gradlew --stop`, rebuild |
