@@ -145,7 +145,7 @@ All CodePush endpoints require an API key (`Authorization: Bearer airbuild_xxx`)
 | `GET` | `/api/codepush/flutter/status?appId=xxx` | List releases, patches, and metrics |
 | `GET` | `/api/codepush/flutter/signing-key` | Org RSA public key material (for `SHOREBIRD_PUBLIC_KEY`) |
 
-Device-facing endpoints (Shorebird wire protocol — called by the updater compiled into the app, not by you):
+Device-facing endpoints (called by the updater runtime embedded in the app — not by your code):
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |

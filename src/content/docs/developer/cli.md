@@ -313,7 +313,7 @@ airbuild codepush flutter doctor
 Checks performed:
 - `dart` on PATH
 - `flutter` on PATH
-- Shorebird toolchain installed in `~/.shorebird`
+- CodePush toolchain installed in `~/.shorebird`
 - `shorebird.yaml` exists and points to AirBuild
 - `.airbuild.json` project config exists
 - API key configured
@@ -329,7 +329,7 @@ airbuild codepush flutter install --yes    # no prompt (CI)
 ```
 
 Currently installs:
-- The Shorebird toolchain — clones `shorebirdtech/shorebird` to `~/.shorebird` (bundled Flutter fork + `patch`/`aot-tools` binaries, cached per engine revision). Used fully locally; no Shorebird account needed.
+- The CodePush build toolchain — a bundled Flutter toolchain + patch-diff binaries installed to `~/.shorebird` (cached per engine revision). Everything runs locally on your machine.
 
 #### `airbuild codepush flutter init`
 
@@ -339,7 +339,7 @@ Initialize the current project for Flutter CodePush.
 airbuild codepush flutter init
 ```
 
-Creates or updates `shorebird.yaml` (`app_id`, `base_url`, `distribution_key`, `channel`, `auto_update`) and adds `shorebird.yaml` to `pubspec.yaml`'s `flutter.assets` so it's bundled into the app. Note: the Shorebird build toolchain only preserves `app_id`, `base_url`, `auto_update`, and `patch_verification` in the compiled asset — `channel`/`distribution_key` are informational; `patch_public_key` comes from the `SHOREBIRD_PUBLIC_KEY` env var (the CLI injects it automatically during builds). Run `airbuild init` first if you haven't already.
+Creates or updates `shorebird.yaml` (`app_id`, `base_url`, `distribution_key`, `channel`, `auto_update`) and adds `shorebird.yaml` to `pubspec.yaml`'s `flutter.assets` so it's bundled into the app. Note: the build toolchain only preserves `app_id`, `base_url`, `auto_update`, and `patch_verification` in the compiled asset — `channel`/`distribution_key` are informational; `patch_public_key` comes from the `SHOREBIRD_PUBLIC_KEY` env var (the CLI injects it automatically during builds). Run `airbuild init` first if you haven't already.
 
 #### `airbuild codepush react-native doctor`
 
@@ -381,7 +381,7 @@ Installs `expo-updates` if missing and sets `expo.updates.url` + `expo.updates.r
 
 ### Flutter CodePush
 
-The CLI bundles Shorebird's Flutter fork and updater toolchain — builds, diffs, and uploads all run locally. **No Shorebird account is needed.** Install it once:
+The CLI bundles its own Flutter build toolchain and the on-device updater — builds, diffs, and uploads all run locally on your machine. Install it once:
 
 ```bash
 airbuild codepush flutter install
@@ -408,7 +408,7 @@ airbuild codepush flutter release ios     --version 1.0.0+1
 | `--channel` | no | `production` | Channel to register the release under |
 | `--format` | no | `apk` | Android build format: `apk` or `aab` |
 | `--flutter-revision` | no | — | Flutter SDK version used |
-| `--shorebird-app-id` | no | — | Shorebird app_id |
+| `--shorebird-app-id` | no | — | Upstream runtime app_id |
 | `--release-notes` | no | — | Release notes |
 | `--artifact` | no | auto-detect | Path to a pre-built release artifact (skips the build step) |
 | `--skip-build` | no | `false` | Don't build — just upload `--artifact` |

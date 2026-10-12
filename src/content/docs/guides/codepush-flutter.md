@@ -7,7 +7,7 @@ description: Push Dart code patches to Flutter apps without a store re-submissio
 
 Flutter CodePush lets you push **Dart-only code patches** to your Flutter app without a full store re-submission. Ship bug fixes and small tweaks in minutes, with staged rollout, on-device signature verification, and instant rollback.
 
-AirBuild is the **control plane** — releases, patches, channels, rollouts, and metrics — while the on-device patching is done by Shorebird's open-source updater runtime. Your app never talks to Shorebird's cloud; everything goes through your AirBuild server. **No Shorebird account is needed at any point.**
+AirBuild is the **control plane** — releases, patches, channels, rollouts, and metrics — while the on-device patching is done by an open-source updater runtime the CLI embeds into your build. Everything goes through your AirBuild server.
 
 ## When to use CodePush — and when not to
 
@@ -32,7 +32,7 @@ The CLI detects these at patch time and **warns** (native/asset/engine diffs are
 
 - An AirBuild account with the `codepush_flutter` feature flag enabled for your organization
 - The [AirBuild CLI](/developer/cli/) installed and authenticated (`airbuild login --api-key airbuild_xxx`)
-- A Flutter project (the AirBuild CLI installs its own Shorebird toolchain — no Shorebird account needed)
+- A Flutter project (the AirBuild CLI installs everything it needs — see setup below)
 - Java 17+ for Android builds (e.g. Android Studio's bundled JBR); Xcode for iOS builds
 
 ## Setup (one-time per project)
@@ -41,7 +41,7 @@ The CLI detects these at patch time and **warns** (native/asset/engine diffs are
 airbuild login --api-key airbuild_xxx
 airbuild init                              # links project → creates .airbuild.json
 airbuild codepush flutter doctor           # verify environment
-airbuild codepush flutter install          # install Shorebird toolchain to ~/.shorebird
+airbuild codepush flutter install          # install the CodePush build toolchain
 airbuild codepush flutter init             # write shorebird.yaml + add it to pubspec assets
 ```
 
@@ -108,7 +108,7 @@ Lists releases, patches, channels, rollout %, and metrics (check-ins, downloads,
 
 Every app has `production` and `staging` by default; custom channels are created implicitly by promoting to a new name.
 
-**Important:** the `channel:` key in `shorebird.yaml` is **stripped at build time** by the Shorebird toolchain — the compiled-in updater always reports `stable`, which AirBuild maps to `production`. So:
+**Important:** the `channel:` key in `shorebird.yaml` is **stripped at build time** — the compiled-in updater always reports `stable`, which AirBuild maps to `production`. So:
 
 - **Automatic updates always come from production.** You cannot point a device at staging via the yaml.
 - **To test staging on a device**, use the [Flutter SDK](/developer/sdks/) with `auto_update: false` and manual checks:
@@ -169,7 +169,7 @@ Dart-define constants compile into `libapp.so`, so they **are patchable** — a 
 | `--architecture` | — | all detected | Restrict to one ABI, e.g. `arm64-v8a` |
 | `--format` | — | `apk` | Android build format: `apk` or `aab` |
 | `--flutter-revision` | — | detected | Flutter SDK revision used to build |
-| `--shorebird-app-id` | — | — | Shorebird app_id, if tracking one |
+| `--shorebird-app-id` | — | — | Upstream runtime app_id, if tracking one |
 | `--release-notes` | — | — | Release notes |
 | `--artifact` | — | auto-detect | Pre-built artifact (skips the build) |
 | `--skip-build` | — | `false` | Don't build — upload `--artifact`/detected output |
@@ -216,7 +216,7 @@ Dart-define constants compile into `libapp.so`, so they **are patchable** — a 
 | Command | Description |
 | ------- | ----------- |
 | `airbuild codepush flutter doctor` | Verify toolchain, config, API reachability |
-| `airbuild codepush flutter install [--yes]` | Install the Shorebird toolchain to `~/.shorebird` |
+| `airbuild codepush flutter install [--yes]` | Install the CodePush build toolchain (`~/.shorebird`) |
 | `airbuild codepush flutter init` | Write `shorebird.yaml` + add it to `pubspec.yaml` assets |
 
 ## Typical workflow
@@ -253,7 +253,7 @@ Only these keys survive into the compiled app — everything else is stripped at
 | `app_id` | Your AirBuild app ID (required) |
 | `base_url` | Your AirBuild origin — the updater calls `{base_url}/api/v1/patches/check` |
 | `auto_update` | `true` (default): engine auto-checks `stable`→production at launch. `false`: no boot check — drive updates from Dart (required for channel selection) |
-| `patch_verification` | Optional Shorebird verifier flag, passed through if set |
+| `patch_verification` | Optional updater verifier flag, passed through if set |
 | `patch_public_key` | **Not read from the yaml** — injected from `SHOREBIRD_PUBLIC_KEY` env at build time (the CLI does this automatically) |
 | `channel`, `distribution_key` | Stripped — informational only |
 
