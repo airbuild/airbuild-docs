@@ -15,9 +15,9 @@ AirBuild supports five roles, listed from most to least privileged:
 | ---------- | ------------------------------------------------------------------ |
 | Owner      | Full control, including deleting the organization.                 |
 | Admin      | Manage members and org settings, upload builds.                    |
-| Developer  | Upload builds and view the dashboard.                              |
-| Tester     | View the dashboard and install builds.                             |
-| Guest      | Limited access — no dashboard. (For invite-only link access.)      |
+| Developer  | Upload builds and view the dashboard. Scoped to granted apps.      |
+| Tester     | View the dashboard and install builds. Scoped to granted apps.     |
+| Guest      | View-only access, scoped to granted apps.                          |
 
 ## Role permissions
 
@@ -30,6 +30,38 @@ AirBuild supports five roles, listed from most to least privileged:
 | Change roles      | ✓     | ✓     | —         | —      | —     |
 | Upload builds     | ✓     | ✓     | ✓         | —      | —     |
 | View dashboard    | ✓     | ✓     | ✓         | ✓      | —     |
+
+## Per-app access
+
+Owners and Admins always have access to every app in the organization.
+Developers, Testers, and Guests only see the apps they are explicitly
+granted — a member with no grants sees no apps at all.
+
+Each grant carries a **per-app role** that caps what the member can do on
+that app:
+
+| Per-app role | Can view the app | Can upload builds / manage OTA updates |
+| ------------ | :--------------: | :------------------------------------: |
+| Developer    | ✓                | ✓                                      |
+| Tester       | ✓                | —                                      |
+| Guest        | ✓                | —                                      |
+
+To manage a member's app access:
+
+1. Go to **Team** in the sidebar.
+2. In the member's row, click the **App Access** button (shows the current
+   grant count).
+3. For each app, choose **Developer**, **Tester**, **Guest**, or
+   **No access**.
+4. Click **Save**.
+
+Grants take effect immediately. Newly invited members start with no app
+access until an Owner or Admin grants it.
+
+:::note
+API keys authenticate as the organization itself and are **not** bound to
+per-app scoping. Only Owners and Admins can create or revoke API keys.
+:::
 
 ## Inviting members
 
