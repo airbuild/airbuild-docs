@@ -87,6 +87,29 @@ await AirBuild.checkForUpdates({
 });
 ```
 
+### CodePush (OTA JS updates)
+
+The same package also exposes `AirBuildCodePush` for OTA bundle updates (see the [React Native CodePush guide](../guides/codepush-react-native/)):
+
+```ts
+import { AirBuild, AirBuildCodePush } from '@airbuild/react-native';
+
+AirBuild.configure({ distributionKey: 'dk_a1b2c3d4e5f6' });
+
+// Reports launch outcomes (installs / startup crashes) to AirBuild —
+// powers install metrics and crash-rate auto-pause. Call once, early.
+// Reuses AirBuild.configure()'s key + base URL.
+AirBuildCodePush.enableTelemetry();
+
+// Optional manual control:
+const info = AirBuildCodePush.currentUpdate; // running update metadata
+const check = await AirBuildCodePush.checkForUpdate();
+await AirBuildCodePush.fetchUpdate();   // download; applies next launch
+await AirBuildCodePush.reload();        // restart into a pending update
+```
+
+Every method no-ops when the OTA runtime isn't installed or enabled (dev builds, Expo Go). Apps that only use binary distribution don't need it.
+
 Repository: [github.com/airbuild/airbuild-react-native](https://github.com/airbuild/airbuild-react-native)
 
 ## iOS

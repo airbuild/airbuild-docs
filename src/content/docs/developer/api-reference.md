@@ -221,6 +221,7 @@ These endpoints power the AirBuild CLI's `codepush` commands. All require an API
 | GET    | `/api/codepush/react-native/status`             | List releases, updates, channels.    |
 | GET    | `/api/codepush/react-native/manifest`           | Device manifest (Expo Updates v1).    |
 | GET    | `/api/codepush/react-native/asset/{id}`         | Download an asset (distribution key). |
+| POST   | `/api/codepush/react-native/events`             | Launch-outcome telemetry (`launch_success`/`emergency_launch`), sent by `airbuild-telemetry.js` / `AirBuildCodePush`. Auth via `?key=` distribution key. |
 
 #### Signing keys
 
