@@ -17,7 +17,7 @@ export default defineConfig({
       favicon: '/favicon.png',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/airbuild' },
-        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/airbuild' },
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/y5JT2AKsE5' },
       ],
       sidebar: [
         {
