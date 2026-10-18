@@ -43,6 +43,7 @@ Install links expire automatically based on your plan:
 | Free        | 7 days      |
 | Starter     | 30 days     |
 | Pro         | Never       |
+| Business    | Never       |
 | Enterprise  | Never       |
 
 Expired links return a "link expired" page and can't be used to install. Create a new link to restore access.
@@ -75,7 +76,7 @@ The install page displays the following information about the build:
 
 ## White-label branding
 
-On **Pro** and **Enterprise** plans, the install page can be branded with your organization's logo, brand color, and display name. Configure branding under **Settings > Organization**.
+On the **Enterprise** plan, the install page can be branded with your organization's logo, brand color, and display name. Configure branding under **Settings > Organization**.
 
 ## Next steps
 

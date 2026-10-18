@@ -63,6 +63,14 @@ API keys authenticate as the organization itself and are **not** bound to
 per-app scoping. Only Owners and Admins can create or revoke API keys.
 :::
 
+:::note[Organization-wide areas]
+Some features are org-scoped rather than app-scoped and don't follow app
+grants: the **Apple Devices** page and **Apple Developer credentials** are
+visible to Owners, Admins, and Developers — Testers and Guests can't access
+them regardless of app access. Connecting or replacing the Apple credential
+is limited to Owners and Admins.
+:::
+
 ## Inviting members
 
 1. Go to **Team** in the sidebar.
@@ -82,6 +90,7 @@ The number of members you can invite depends on your plan:
 | Free        | 2           |
 | Starter     | 5           |
 | Pro         | 20          |
+| Business    | 50          |
 | Enterprise  | Unlimited   |
 
 If you've reached your limit, upgrade your plan or remove an existing member before inviting a new one.

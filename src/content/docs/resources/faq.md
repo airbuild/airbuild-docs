@@ -24,6 +24,7 @@ The number of team members you can invite is limited by your plan:
 - **Free** — 2 members
 - **Starter** — 5 members
 - **Pro** — 20 members
+- **Business** — 50 members
 - **Enterprise** — Unlimited
 
 Install links can be shared with anyone — you don't need to add someone as a team member for them to install a build. See [Team Management](../guides/team-management/) for details.
@@ -32,9 +33,9 @@ Install links can be shared with anyone — you don't need to add someone as a t
 
 **Not yet.** We're exploring a migration tool to import apps and testers from Firebase App Distribution. Contact support if this is important to you.
 
-## Can I use my own domain?
+## Can I use my own branding or domain?
 
-**Yes**, on **Pro** and **Enterprise** plans. White-label branding (custom logo, color, and display name) is available on Pro and Enterprise. Custom domain support is available on Enterprise. See [Billing & Plans](../guides/billing/) for plan features.
+**Branding: yes, on Enterprise.** White-label branding (custom logo, color, and display name on install pages) is available on the Enterprise plan. **Custom domains are not currently supported.** See [Billing & Plans](../guides/billing/) for plan features.
 
 ## What's the max build size?
 
@@ -43,6 +44,7 @@ The **hard cap is 2 GB** for any plan. Plan-based limits apply below that:
 - Free — 100 MB
 - Starter — 300 MB
 - Pro — 1 GB
+- Business — 2 GB
 - Enterprise — Custom
 
 ## Is there an API?
@@ -52,6 +54,10 @@ The **hard cap is 2 GB** for any plan. Plan-based limits apply below that:
 - [REST API Reference](../developer/api-reference/)
 - [Webhooks](../developer/webhooks/)
 - [CLI Tool](../developer/cli/)
+
+## What are audit logs?
+
+The **Audit Logs** page records security-relevant actions in your organization — member changes, credential updates, device registrations and removals, deletions — along with who performed each action and when. Any organization member can view it; use it to trace who changed what.
 
 ## How does virus scanning work?
 

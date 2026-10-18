@@ -35,6 +35,7 @@ export default defineConfig({
             { label: 'iOS OTA Installation', slug: 'guides/ios-installation' },
             { label: 'Android APK Installation', slug: 'guides/android-installation' },
             { label: 'UDID Capture', slug: 'guides/udid-capture' },
+            { label: 'Apple Developer Integration', slug: 'guides/apple-developer-integration' },
             { label: 'CodePush / OTA Updates', slug: 'guides/codepush' },
             { label: 'Flutter CodePush', slug: 'guides/codepush-flutter' },
             { label: 'React Native CodePush', slug: 'guides/codepush-react-native' },

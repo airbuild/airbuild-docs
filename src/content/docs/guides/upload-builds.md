@@ -35,6 +35,7 @@ File size limits depend on your plan. There is a **2 GB hard cap** regardless of
 | Free        | 100 MB         |
 | Starter     | 300 MB         |
 | Pro         | 1 GB           |
+| Business    | 2 GB           |
 | Enterprise  | Custom         |
 | **Hard cap**| **2 GB**       |
 

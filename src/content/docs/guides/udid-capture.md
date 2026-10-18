@@ -24,8 +24,9 @@ UDID capture is **invite-based**. Each tester gets a personal, single-use regist
 3. **iOS installs a `.mobileconfig` profile** — iOS prompts the tester to install a temporary configuration profile.
 4. **The profile sends the UDID back to AirBuild** — The device record is stored together with the tester's **name and email**, so you always know which UDID belongs to whom.
 5. **You get an email notification** — Org owners and admins are notified when a device registers.
-6. **Add the UDID to your provisioning profile** — In the Apple Developer portal, register the device, include it in the provisioning profile, and download the updated profile. Mark the device as **Registered** in the Devices tab to track it.
-7. **Rebuild and re-upload** — Upload a build signed with the updated profile; the tester can now install it.
+6. **Register the UDID on your Apple Developer account** — If you've connected the [Apple Developer integration](./apple-developer-integration/) and enabled auto-registration, this happens automatically. Otherwise register the device manually in the Apple Developer portal (or use the **Register** button in the Devices tab).
+7. **Add the device to your provisioning profile** — Include it in the profile, download the updated profile, and mark the device as **Registered** in the Devices tab to track it.
+8. **Rebuild and re-upload** — Upload a build signed with the updated profile; the tester can now install it.
 
 :::note
 Public install links no longer offer UDID registration — device enrollment always happens through a personal invite so every UDID is tied to a verified email address.
@@ -54,7 +55,21 @@ When a tester registers their device, AirBuild captures:
 
 Devices are listed in your app's **Devices** tab. You can copy the UDID directly from the list to paste into the Apple Developer portal, and mark a device as **Registered** once it's been added to a provisioning profile.
 
+With the [Apple Developer integration](./apple-developer-integration/) connected, the tab also offers:
+
+- **Auto-register devices** — Toggle to register every newly captured UDID on your Apple account automatically.
+- **Register** / **Register all** — Push captured UDIDs to Apple manually.
+- **Sync status** — Reconcile the registered flag with what's actually on your Apple account.
+- **Remove** — Delete the captured device from AirBuild (does not affect the Apple account or already-installed builds).
+
+For account-wide device management — including devices registered outside AirBuild — see the [Apple Devices page](./apple-developer-integration/#the-apple-devices-page).
+
+## Standalone UDID tool
+
+Need *your own* UDID quickly, without any app or invite? There's a public, build-agnostic version of the tool at [airbuild.dev/udid](https://airbuild.dev/udid). Enter an email, verify the magic link, install the profile on your iPhone, and the UDID is shown on screen and emailed to you. It isn't tied to any app or organization.
+
 ## Next steps
 
+- [Apple Developer Integration](./apple-developer-integration/) — Auto-register UDIDs and manage devices centrally.
 - [iOS OTA Installation](./ios-installation/) — How ad-hoc installs work once the UDID is registered.
 - [Team Management](./team-management/) — Manage who has access to your apps.

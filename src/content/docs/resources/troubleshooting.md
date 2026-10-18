@@ -26,7 +26,7 @@ For enterprise-distributed apps, iOS requires you to manually trust the develope
 
 ### App won't install
 
-- The device's **UDID is not in the provisioning profile**. Use [UDID capture](../guides/udid-capture/) to register the device, then add the UDID to your provisioning profile in the Apple Developer portal, rebuild, and re-upload.
+- The device's **UDID is not in the provisioning profile**. Use [UDID capture](../guides/udid-capture/) to register the device, then add the UDID to your provisioning profile in the Apple Developer portal, rebuild, and re-upload. With the [Apple Developer integration](../guides/apple-developer-integration/) connected, device registration can be automatic — adding the device to the profile is still a manual step.
 - The **provisioning profile has expired**. Regenerate it, rebuild, and re-upload.
 - The IPA was built for **App Store distribution** instead of ad-hoc or enterprise. Rebuild with the correct profile.
 
@@ -63,6 +63,24 @@ For enterprise-distributed apps, iOS requires you to manually trust the develope
 
 - Check if the link has been **revoked**. Restore it from the build detail page.
 - Check if the link is **password-protected**. Enter the password on the install page.
+
+## Apple Developer integration
+
+### "Connection problem" warning in Settings
+
+- Apple rejected your App Store Connect API key — it may have been **revoked**, **expired**, or had its **role reduced** below App Manager.
+- Generate a new key in App Store Connect → Users and Access → Integrations, then use **Replace key** in Settings.
+- Owners and admins also get an email alert (at most once per day). See the [Apple Developer integration guide](../guides/apple-developer-integration/) for details.
+
+### Auto-registration fails for a captured device
+
+- Check the reason in the "new device registered" email — it's included there.
+- **Device limit reached** — Apple allows 100 devices per membership year. Disable unused devices on the **Apple Devices** page.
+- Retry manually from the app's **Devices** tab → **Register**.
+
+### A device can't be deleted on the Apple Devices page
+
+Apple doesn't allow deleting devices through the API — you can only **disable** them. Disabled devices still count toward the yearly device limit until your membership renews.
 
 ## API
 
