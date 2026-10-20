@@ -126,6 +126,23 @@ if (status == UpdateStatus.outdated) await codePush.update();
 
 With `auto_update: false` the engine's boot thread does nothing — `checkForUpdate`/`update` are the only update path, and the channel name is sent verbatim to the server (`"staging"`, `"internal-qa"`, anything you promote to).
 
+For a batteries-included option, `AirBuildCodePushOverlay` runs the whole lifecycle (check on launch/resume/timer → download → restart banner) from a single widget — see the [Flutter SDK reference](/developer/sdks/):
+
+```dart
+MaterialApp(
+  builder: (context, child) => AirBuildCodePushOverlay(
+    config: AirBuildCodePushConfig(
+      channel: 'staging',
+      onRestart: () => restartMyApp(),
+    ),
+    child: child ?? const SizedBox.shrink(),
+  ),
+  home: const HomePage(),
+)
+```
+
+If the same binary is also distributed via Google Play, `disableOnPlayStoreInstalls: true` (on `AirBuildCodePush` or the overlay config) skips patch checks/downloads on Play-installed devices. It only gates Dart-driven checks — the `auto_update` boot thread is unaffected, so combine it with `auto_update: false`.
+
 ## Patch signing
 
 Every patch response carries `hash_signature` (RSA-PKCS1v15-SHA256 over the artifact hash). The CLI **automatically** fetches your org's public key at build time and injects it via `SHOREBIRD_PUBLIC_KEY` — builds made through `airbuild codepush flutter release|patch` verify patch signatures on-device by default. Devices built without the key skip signature checks (hash integrity still applies).
