@@ -20,6 +20,19 @@ Your first organization is created automatically when you sign up. You can creat
 
 Each user can own up to **10 organizations**. Need more? Contact support.
 
+Only **one unpaid organization per account** gets the Free plan — your oldest one. Additional unpaid organizations are suspended until they subscribe. See [Billing & Plans](../guides/billing/#multiple-organizations).
+
+## Deleting an organization
+
+Only the **sole owner** can delete an organization, from **Settings → Danger Zone**. If other members exist, they must be removed first.
+
+When an organization is deleted:
+
+- **Data is permanently wiped immediately** — apps, builds, install links, API keys, webhooks, invites, and Apple Developer credentials are gone for good.
+- **Billing records are retained** — invoices, subscriptions, and usage history are kept for statutory and support purposes, and the subscription is cancelled.
+- **Members are removed** and the organization disappears from everyone's sidebar. Its original name/slug becomes reusable.
+- **Recovery is admin-side only** — if the deletion was a genuine mistake, contact support promptly. Support can restore the organization shell and re-create memberships, but **wiped data cannot be recovered**.
+
 ## Switching between orgs
 
 Use the **org switcher** in the sidebar to switch between organizations you belong to. Your current organization is shown at the top of the sidebar, and all pages (Apps, Team, Settings, Billing) are scoped to the selected org.

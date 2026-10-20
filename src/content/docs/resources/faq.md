@@ -59,6 +59,12 @@ The **hard cap is 2 GB** for any plan. Plan-based limits apply below that:
 
 The **Audit Logs** page records security-relevant actions in your organization — member changes, credential updates, device registrations and removals, deletions — along with who performed each action and when. Any organization member can view it; use it to trace who changed what.
 
+## Can I recover something I deleted?
+
+**Builds and apps:** yes, within **30 days**. Deleted builds keep their files until the purge sweep runs, and deleted apps appear under **Apps → Archived** with an **Unarchive** option. After the window, storage is permanently removed.
+
+**Organizations:** data is wiped immediately on deletion and is **not** recoverable — only billing/audit records are retained. If it was a genuine accident, contact support — they can restore the organization shell and memberships, but not the wiped content. See [Organizations](../getting-started/organization/#deleting-an-organization).
+
 ## How does virus scanning work?
 
 All uploads are scanned with **ClamAV** before being made available for download. If ClamAV is unavailable (e.g. the daemon is down), the scan **fails open** — the build is still processed and made available. This ensures uploads aren't blocked by scanner outages.

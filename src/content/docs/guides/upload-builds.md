@@ -115,6 +115,15 @@ An install link is **auto-generated** as soon as the build is uploaded. You'll f
 - **Email** — Org members receive an email notification when a new build is uploaded.
 - **Webhook** — The `build.uploaded` webhook event is fired. See [Webhooks](../developer/webhooks/) for details.
 
+## Deleting builds and apps
+
+Deletions aren't instant — both go through a **30-day trash window**:
+
+- **Builds** — a deleted build keeps its files for 30 days, then storage is permanently purged. Within the window it can be restored (the install links it had stay deactivated — create new ones).
+- **Apps** — deleting an app archives it and schedules it for permanent purge after 30 days, including all of its builds. Open **Apps → Archived** and use **Unarchive** to restore it.
+
+Trashed content still counts toward your storage quota until it's purged — if you're over quota, the enforcement sweep removes trashed builds before touching live ones.
+
 ## Next steps
 
 - [Install Links & QR Codes](./install-links/) — Configure passwords, expiry, and quotas.

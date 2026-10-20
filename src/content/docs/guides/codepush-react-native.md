@@ -98,6 +98,28 @@ When an update's failure rate reaches **30%** across **at least 10 install repor
 
 Outcomes are attributed per device and deduplicated: only the first report per device per update counts, and a failure reported later still overrides an earlier premature success. A startup crash that kills the app before it can report is still detected on the next launch — the telemetry module tracks the downloaded-but-never-launched update and reports it as a failure then.
 
+## Device identity &amp; billing
+
+AirBuild meters **unique devices per month** (`airbuild-device-id`) — this is your MAU metric and what device quota/add-ons count. One device = one unit, no matter how many updates it pulls.
+
+For accurate counting the id must persist across network changes. The generated telemetry module (`airbuild-telemetry.js`) or `AirBuildCodePush.enableTelemetry()` handles this automatically — it generates a UUID once and stores it as an expo-updates extra param, which rides on every manifest request.
+
+If you don't use the telemetry module, set the param yourself at startup — e.g. with a natively stable id from `expo-application`:
+
+```ts
+import * as Updates from "expo-updates";
+import * as Application from "expo-application";
+
+void (async () => {
+  const id =
+    (await Application.getIosIdForVendorAsync().catch(() => null)) ??
+    Application.getAndroidId();
+  if (id) await Updates.setExtraParamAsync("airbuild-device-id", id).catch(() => {});
+})();
+```
+
+Without a persisted id, devices are counted by their IP — which is only approximate on dynamic/mobile networks.
+
 ## CLI commands
 
 ### `airbuild codepush react-native publish`
