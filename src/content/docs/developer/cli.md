@@ -74,7 +74,6 @@ For non-interactive environments — CI pipelines, Docker containers, AI coding 
 | Variable | Purpose |
 | -------- | ------- |
 | `AIRBUILD_API_KEY` | API key (`airbuild_xxx`). Authenticates every command — no `login` step needed. |
-| `AIRBUILD_API_URL` | Override the API base URL (self-hosted or staging). |
 
 ```bash
 export AIRBUILD_API_KEY=airbuild_xxx

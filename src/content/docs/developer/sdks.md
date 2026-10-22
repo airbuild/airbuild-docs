@@ -30,7 +30,7 @@ All SDKs support the following:
 All SDKs use the same configuration model:
 
 1. **Distribution key** (`dk_xxx`) — a public, per-app identifier from the AirBuild dashboard (App Settings page). Safe to embed in distributed apps — it is not a secret.
-2. **Base URL** (optional) — defaults to `https://airbuild.dev`. Override for self-hosted or staging environments.
+2. **Base URL** — all SDKs talk to `https://airbuild.dev`. No configuration needed.
 
 No secret token is needed. Secrets embedded in mobile apps get extracted from APK/IPA binaries, so the distribution key is public by design. Access control is handled server-side (password-protected builds, rate limiting, download quotas).
 
@@ -174,17 +174,6 @@ All SDKs handle the full flow automatically:
    - **Android**: Downloads the APK to the cache directory and launches the system PackageInstaller via an Intent.
    - **iOS**: Opens the install URL in Safari/SFSafariViewController (iOS does not allow sideloading IPAs in-app).
 4. **Analytics** — Reports events throughout the flow: `update_prompt_shown`, `update_accepted`, `update_declined`, `download_started`, `install_started`.
-
-## Self-hosted / staging
-
-Override the base URL to point at your own AirBuild server:
-
-| SDK | Code |
-|-----|------|
-| Flutter | `AirBuild.configure(distributionKey: '...', baseUrl: 'https://staging.airbuild.dev')` |
-| React Native | `AirBuild.configure({ distributionKey: '...', baseUrl: 'https://staging.airbuild.dev' })` |
-| iOS | `AirBuild.configure(distributionKey: "...", baseUrl: URL(string: "https://staging.airbuild.dev")!)` |
-| Android | `AirBuild.configure(distributionKey = "...", baseUrl = "https://staging.airbuild.dev")` |
 
 ## Where to find your distribution key
 

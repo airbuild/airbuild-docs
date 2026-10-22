@@ -268,7 +268,7 @@ Only these keys survive into the compiled app — everything else is stripped at
 | Key | Effect |
 | --- | ------ |
 | `app_id` | Your AirBuild app ID (required) |
-| `base_url` | Your AirBuild origin — the updater calls `{base_url}/api/v1/patches/check` |
+| `base_url` | `https://airbuild.dev` (written by `init`) — the updater calls `{base_url}/api/v1/patches/check` |
 | `auto_update` | `true` (default): engine auto-checks `stable`→production at launch. `false`: no boot check — drive updates from Dart (required for channel selection) |
 | `patch_verification` | Optional updater verifier flag, passed through if set |
 | `patch_public_key` | **Not read from the yaml** — injected from `SHOREBIRD_PUBLIC_KEY` env at build time (the CLI does this automatically) |
