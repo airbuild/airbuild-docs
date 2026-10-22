@@ -12,7 +12,7 @@ AirBuild offers in-app SDKs that let your app check for new binary builds and pr
 | Platform      | Package name                  | Package manager       | Status     |
 | ------------- | ----------------------------- | --------------------- | ---------- |
 | Flutter       | `airbuild`                    | pub.dev               | Available  |
-| React Native  | `@airbuild/react-native`      | npm                   | Available  |
+| React Native  | `@airbuild/react-native`      | npm                   | Publishing |
 | iOS           | `AirBuild`                    | CocoaPods / SPM       | Via git tag / SPM   |
 | Android       | `dev.airbuild:airbuild-android`| Maven Central         | Via GitHub / JitPack |
 

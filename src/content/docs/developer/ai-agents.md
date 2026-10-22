@@ -54,7 +54,7 @@ uploads, install links, and CodePush OTA patches for Flutter / React Native).
   `airbuild login --api-key $AIRBUILD_API_KEY` or just export the key.
 - Auth: `AIRBUILD_API_KEY` env var (Dashboard → Settings → API Keys).
   NEVER commit it, `~/.airbuild/config.json`, or any `airbuild_*` key.
-- Self-hosted: set `AIRBUILD_API_URL`. Project config lives in
+- Custom endpoint (staging): set `AIRBUILD_API_URL`. Project config lives in
   `.airbuild.json` (app ID + build paths, created by `airbuild init`).
 
 ### In-app SDKs (update prompts inside the app)
@@ -72,6 +72,9 @@ Settings page — safe to embed; NOT the `airbuild_*` API key).
 - Android: Gradle dep `dev.airbuild:airbuild-android` →
   `AirBuild.configure(distributionKey = "dk_…")`, then `AirBuild.checkForUpdates(context, version)`.
 - Full guide: https://docs.airbuild.dev/developer/sdks/
+- Source repos: github.com/airbuild/{airbuild-cli, airbuild-flutter,
+  airbuild-react-native, airbuild-ios, airbuild-android} — file SDK bugs
+  against the matching repo.
 
 ### Rules for agents
 
@@ -111,7 +114,7 @@ Agents shouldn't run `airbuild login` — export the key instead:
 
 ```bash
 export AIRBUILD_API_KEY=airbuild_xxx   # Settings → API Keys in the dashboard
-# optional, self-hosted/staging:
+# optional — custom API endpoint (staging/internal):
 export AIRBUILD_API_URL=https://your-airbuild.example.com
 ```
 
@@ -174,6 +177,19 @@ Native targets use the same shape: `AirBuild.configure(...)` once, then `checkFo
 
 - **OpenAPI spec**: [`https://airbuild.dev/api/openapi`](https://airbuild.dev/api/openapi) — OpenAPI 3.0 JSON covering the REST API. Feed it to codegen tools or agents that speak OpenAPI.
 - **REST API**: see the [API Reference](../api-reference/) — `Authorization: Bearer airbuild_xxx` works for every endpoint.
+
+## Source repositories
+
+All AirBuild repos are public — agents can clone them to inspect SDK internals or file issues:
+
+| Component | Repository | Package |
+| --------- | ---------- | ------- |
+| CLI | [airbuild/airbuild-cli](https://github.com/airbuild/airbuild-cli) | binaries on Releases, `go install` |
+| Flutter SDK | [airbuild/airbuild-flutter](https://github.com/airbuild/airbuild-flutter) | `airbuild` on pub.dev |
+| React Native SDK | [airbuild/airbuild-react-native](https://github.com/airbuild/airbuild-react-native) | `@airbuild/react-native` on npm |
+| iOS SDK | [airbuild/airbuild-ios](https://github.com/airbuild/airbuild-ios) | `AirBuild` — SPM / CocoaPods |
+| Android SDK | [airbuild/airbuild-android](https://github.com/airbuild/airbuild-android) | `dev.airbuild:airbuild-android` |
+| Docs | [airbuild/airbuild-docs](https://github.com/airbuild/airbuild-docs) | this site |
 
 ## Next steps
 
