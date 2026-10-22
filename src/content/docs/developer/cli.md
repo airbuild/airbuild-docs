@@ -67,6 +67,22 @@ airbuild login --api-key airbuild_xxx
 
 This stores your API key in the config file at `~/.airbuild/config.json` (on Windows: `%USERPROFILE%\.airbuild\config.json`).
 
+### Environment variables (CI/CD & agents)
+
+For non-interactive environments — CI pipelines, Docker containers, AI coding agents — you can skip `login` entirely and authenticate with environment variables:
+
+| Variable | Purpose |
+| -------- | ------- |
+| `AIRBUILD_API_KEY` | API key (`airbuild_xxx`). Authenticates every command — no `login` step needed. |
+| `AIRBUILD_API_URL` | Override the API base URL (self-hosted or staging). |
+
+```bash
+export AIRBUILD_API_KEY=airbuild_xxx
+airbuild apps list --json   # works immediately — no login required
+```
+
+Environment variables take precedence over `~/.airbuild/config.json`. See [AI Coding Assistants](./ai-agents/) for agent-specific setup.
+
 ## Quick start
 
 The fastest way to get started is with `init` + `push`:
@@ -85,6 +101,17 @@ airbuild push                  # uploads the build and prints the install link
 
 ## Commands
 
+### Machine-readable output (`--json`)
+
+Every command accepts a global `--json` flag. In JSON mode, stdout carries only machine-readable JSON — progress, tables, and errors go to stderr, and failures exit with a non-zero status. This is the recommended mode for scripts and AI agents:
+
+```bash
+airbuild apps list --json
+airbuild builds list --app-id clxxxxx --json
+airbuild codepush flutter status --json
+airbuild codepush flutter promote --patch 1 --rollout 10 --json
+```
+
 ### `airbuild init`
 
 Create a `.airbuild.json` config file for your project. This enables `airbuild push` — a one-command workflow that reads build paths from config.
@@ -92,7 +119,15 @@ Create a `.airbuild.json` config file for your project. This enables `airbuild p
 ```bash
 airbuild init                    # Interactive setup
 airbuild init --app-id clxxxx    # Link an existing app by ID
+airbuild init --yes              # Non-interactive: accept all defaults
+airbuild init --agents           # Also write AGENTS.md/CLAUDE.md for AI coding assistants
 ```
+
+| Flag | Description | Default |
+| ---- | ----------- | ------- |
+| `--app-id` | Link an existing app by ID | prompt |
+| `--yes` | Non-interactive — answer yes to prompts and accept defaults | no |
+| `--agents` | Write AI assistant instruction files (`AGENTS.md`, `CLAUDE.md`) — see [AI Coding Assistants](./ai-agents/) | no |
 
 The interactive flow:
 
@@ -639,13 +674,12 @@ jobs:
       - name: Install AirBuild CLI
         run: curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
 
-      - name: Login
-        run: airbuild login --api-key ${{ secrets.AIRBUILD_API_KEY }}
-
       - name: Build
         run: flutter build apk --release
 
       - name: Push to AirBuild
+        env:
+          AIRBUILD_API_KEY: ${{ secrets.AIRBUILD_API_KEY }}
         run: airbuild push --json
 ```
 
@@ -668,11 +702,10 @@ jobs:
       - name: Install AirBuild CLI
         run: curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
 
-      - name: Login
-        run: airbuild login --api-key ${{ secrets.AIRBUILD_API_KEY }}
-
       - name: Upload build
-        run: airbuild upload ./app/build/outputs/apk/release/app-release.apk --app-id ${{ secrets.AIRBUILD_APP_ID }}
+        env:
+          AIRBUILD_API_KEY: ${{ secrets.AIRBUILD_API_KEY }}
+        run: airbuild upload ./app/build/outputs/apk/release/app-release.apk --app-id ${{ secrets.AIRBUILD_APP_ID }} --json
 ```
 
 ### GitLab CI
@@ -687,7 +720,7 @@ distribute:
     - tags
   script:
     - curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | bash
-    - airbuild login --api-key $AIRBUILD_API_KEY
+    # AIRBUILD_API_KEY is set as a CI variable — no login step needed
     - airbuild push --json
 ```
 
@@ -696,7 +729,7 @@ distribute:
 ```yaml
 - script: |
     irm https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.ps1 | iex
-    airbuild login --api-key $(AIRBUILD_API_KEY)
+    # $(AIRBUILD_API_KEY) pipeline variable is picked up automatically
     airbuild push --platform android --release
 ```
 
@@ -740,4 +773,5 @@ This triggers the release workflow which cross-compiles binaries for all 6 platf
 
 - [API Keys](./api-keys/) — Create a key for CLI authentication.
 - [API Reference](./api-reference/) — The underlying API the CLI uses.
+- [AI Coding Assistants](./ai-agents/) — Let agents drive the CLI with `--json` and `AIRBUILD_API_KEY`.
 - [Upload Builds](../guides/upload-builds/) — The dashboard upload flow.

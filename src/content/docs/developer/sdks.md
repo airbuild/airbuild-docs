@@ -13,8 +13,8 @@ AirBuild offers in-app SDKs that let your app check for new binary builds and pr
 | ------------- | ----------------------------- | --------------------- | ---------- |
 | Flutter       | `airbuild`                    | pub.dev               | Available  |
 | React Native  | `@airbuild/react-native`      | npm                   | Available  |
-| iOS           | `AirBuild`                    | CocoaPods / SPM       | Available  |
-| Android       | `io.airbuild:airbuild-android`| Maven Central         | Available  |
+| iOS           | `AirBuild`                    | CocoaPods / SPM       | Via git tag / SPM   |
+| Android       | `dev.airbuild:airbuild-android`| Maven Central         | Via GitHub / JitPack |
 
 ## Features
 
@@ -117,7 +117,7 @@ Repository: [github.com/airbuild/airbuild-react-native](https://github.com/airbu
 Install via CocoaPods:
 
 ```ruby
-pod 'AirBuild', :git => 'https://github.com/airbuild/airbuild-ios.git', :tag => '0.1.0'
+pod 'AirBuild', :git => 'https://github.com/airbuild/airbuild-ios.git', :tag => '0.1.1'
 ```
 
 Or via Swift Package Manager — add the repository URL in Xcode:
@@ -145,7 +145,7 @@ Repository: [github.com/airbuild/airbuild-ios](https://github.com/airbuild/airbu
 Add to your `build.gradle`:
 
 ```groovy
-implementation 'io.airbuild:airbuild-android:0.1.0'
+implementation 'dev.airbuild:airbuild-android:0.1.1'
 ```
 
 ### Usage

@@ -26,6 +26,8 @@ The API supports two authentication methods:
 
 An interactive **OpenAPI viewer** is available at [`/api-docs`](https://airbuild.dev/api-docs) when logged in. You can explore endpoints, parameters, and try requests directly from the browser.
 
+The raw **OpenAPI 3.0 specification** is served at [`https://airbuild.dev/api/openapi`](https://airbuild.dev/api/openapi) — machine-readable JSON suitable for codegen tools and AI agents. For agent-friendly documentation, [`llms.txt`](https://docs.airbuild.dev/llms.txt) and [`llms-full.txt`](https://docs.airbuild.dev/llms-full.txt) index all docs pages. See [AI Coding Assistants](./ai-agents/).
+
 ## Endpoints
 
 ### Uploads

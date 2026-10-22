@@ -48,6 +48,7 @@ export default defineConfig({
           items: [
             { label: 'API Keys', slug: 'developer/api-keys' },
             { label: 'REST API Reference', slug: 'developer/api-reference' },
+            { label: 'AI Coding Assistants', slug: 'developer/ai-agents' },
             { label: 'Webhooks', slug: 'developer/webhooks' },
             { label: 'CLI Tool', slug: 'developer/cli' },
             { label: 'SDKs', slug: 'developer/sdks' },
