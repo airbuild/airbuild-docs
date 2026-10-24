@@ -29,7 +29,7 @@ The `airbuild_` prefix makes keys easy to identify in logs and secrets managers.
 
 ## Creating an API key
 
-1. Go to **Settings > API Keys** in the dashboard.
+1. Open the **[API Keys](https://airbuild.dev/api-keys)** page in the dashboard (sidebar → API Keys).
 2. Click **Create API Key**.
 3. Enter a **name** for the key (e.g. "CI pipeline", "Local CLI").
 4. Click **Create**.
@@ -63,7 +63,7 @@ curl https://airbuild.dev/api/cli/verify \
 
 To revoke a key:
 
-1. Go to **Settings > API Keys**.
+1. Go to the **[API Keys](https://airbuild.dev/api-keys)** page.
 2. Find the key you want to revoke.
 3. Click **Revoke**.
 4. The key immediately stops working for all API and CLI requests.

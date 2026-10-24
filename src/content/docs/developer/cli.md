@@ -59,7 +59,7 @@ go install github.com/airbuild/airbuild-cli@latest
 
 ## Authentication
 
-Authenticate with an API key (see [API Keys](./api-keys/) for how to create one):
+Authenticate with an API key — [create one on the API Keys page](https://airbuild.dev/api-keys) in the dashboard (see the [API Keys guide](./api-keys/) for details):
 
 ```bash
 airbuild login --api-key airbuild_xxx
