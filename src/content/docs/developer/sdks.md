@@ -254,6 +254,10 @@ Every method no-ops when the OTA runtime isn't installed or enabled (dev builds,
 
 Repository: [github.com/airbuild/airbuild-react-native](https://github.com/airbuild/airbuild-react-native)
 
+## Capacitor
+
+**Coming soon.** Web-content OTA updates for Capacitor apps — staged rollouts, instant rollback, and the same install funnel as Flutter and React Native — are on the roadmap.
+
 ## iOS
 
 Install via CocoaPods:

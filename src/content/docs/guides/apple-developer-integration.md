@@ -69,7 +69,7 @@ Auto-registration only registers the device — it does not add it to a provisio
 ## The Apple Devices page
 
 :::note[Plan availability]
-Central device management is available on **Starter, Pro, Business, and Enterprise** plans. Device *registration* — auto-registration, manual Register, Register all, and Sync status — works on every plan, including Free.
+The Apple Developer integration — connecting your App Store Connect key, auto-registration, manual Register, Register all, Sync status, and central device management — is available on **Indie, Starter, Pro, Business, and Enterprise** plans. On Free, UDID capture still works, but devices must be registered manually in the Apple Developer portal.
 :::
 
 Once connected, an **Apple Devices** item appears in the sidebar (visible to owners, admins, and developers). It shows **every device on your Apple Developer account** — not just ones captured by AirBuild — merged with AirBuild context like the tester's email and the app they registered for.

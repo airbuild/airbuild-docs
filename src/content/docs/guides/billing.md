@@ -5,7 +5,7 @@ description: Plans, upgrades, downgrades, and invoices via Razorpay.
 
 # Billing & Plans
 
-AirBuild offers four self-serve plans — Free, Starter, Pro, and Business — plus Enterprise with custom pricing. Billing is handled by **Razorpay** with support for INR and USD.
+AirBuild offers five self-serve plans — Free, Indie, Starter, Pro, and Business — plus Enterprise with custom pricing. Billing is handled by **Razorpay** with support for INR and USD.
 
 :::note[Live pricing]
 Plan features and prices are managed in the AirBuild backend and can change at any time. For the most up-to-date pricing, see the **[Pricing page](https://airbuild.dev/pricing)**.
@@ -112,15 +112,19 @@ OTA usage is metered **separately** from regular build downloads — if you use 
 
 ## Add-ons
 
-**Plan add-ons** (Billing → Add-ons) add monthly capacity on top of your plan — for example +10 GB storage or +2,500 downloads per month — usually cheaper than upgrading the whole plan. Each add-on shows its rate in real units (e.g. `+10 GB · ₹149/mo`), and the quantity picker previews the exact quota and price you'll get.
+**Plan add-ons** (Billing → Add-ons) add monthly capacity on top of your plan — for example +10 GB storage or +2,500 downloads per month — usually cheaper than upgrading the whole plan. The section lists your **active add-ons** (type, quantity, monthly rate); click **Subscribe Add-on** (or **Manage Add-ons**) to open a dialog where you pick the type and quantity. It previews the quota, rate, and a **GST-inclusive total before any charge happens** — money moves only when you confirm. The same dialog manages an existing add-on: change the quantity or cancel it.
 
 OTA **update publishes** have no add-on — they stay within your plan's monthly cap (generous by design), and usage credits act as the overflow if you ever exceed it.
 
 - Add-ons require an **active paid subscription** and only appear for features included in your plan.
 - They're billed on the same cycle as your subscription; quantity increases are **prorated** immediately, while **decreases take effect at the next billing period** — you keep what you paid for this cycle.
+- Cancelling keeps the add-on active until the cycle end; the list shows **"Cancels soon"** and the date it ends.
 - If a plan change makes an add-on ineligible, it's flagged so you can cancel it.
+- If a charge would exceed your payment mandate's limit, you'll be prompted to **re-authorize the mandate** at a higher cap — a short checkout that updates the mandate on your existing subscription (no plan change).
 
 **Running out of storage:** if you exceed your storage quota, new uploads are blocked and you'll get warning emails during a grace period (7 days by default). After the grace period, your **oldest builds are automatically deleted** until you're back under quota — each app's latest build is spared so live install links keep working. If you're *still* over quota after that, you'll get one final warning, and a few days later **all remaining builds are deleted** — including latest versions.
+
+**Pending deletions:** deleted apps and trashed builds still occupy storage until the 30-day purge. The usage card shows them as **"X pending deletion"** — click **Free now** to permanently delete them immediately and free the space (requires owner or admin; logged to the audit log).
 
 ## Referrals & wallet
 
@@ -132,15 +136,17 @@ Every account has a **referral link** (Settings → Referrals & Wallet). When so
 
 ## Usage credits
 
-**Credit packs** are one-time prepaid bundles of **usage credits**, bought on Billing → Add-ons. Credits are consumed only **after** your included plan + add-on quotas are exhausted — a pay-as-you-go safety net that keeps installs and OTA updates working mid-month instead of hard-stopping at the quota.
+**Credit packs** are one-time prepaid bundles of **usage credits**, bought from Billing → Add-ons → **Add Credits**. Credits are consumed only **after** your included plan + add-on quotas are exhausted — a pay-as-you-go safety net that keeps installs and OTA updates working mid-month instead of hard-stopping at the quota.
 
+- Pick a pack from the dropdown — it shows the credits, price, and the **GST-inclusive total before you pay**. Click **Buy** to open checkout.
 - Credits are added to your balance immediately after payment.
 - The per-action credit cost is listed on the same page (high-frequency actions like OTA downloads can price below one credit — e.g. "1 credit per 100 downloads").
-- **Wallet conversion** — the organization owner can convert wallet balance (e.g. refunds or promotional credit) into usage credits at the rate shown on the page.
+- **Wallet conversion** — the organization owner can convert wallet balance (e.g. refunds or promotional credit) into usage credits from the same dialog's **Convert wallet** tab.
+- Buying packs requires a **complete billing profile** — the dialog lists any missing fields with a link to Settings.
 
 ## Invoices
 
-Invoices are available for download under **Settings > Billing > Invoices**. Each invoice shows the plan, billing period, amount, coupon discount, GST breakdown (CGST/SGST or IGST, with HSN/SAC code and place of supply), and payment method. An invoice is created for every charge, including your **first** subscription payment, and you get it by email once the payment succeeds.
+Invoices are available for download under **Settings > Billing > Invoices**. Each invoice shows the plan, billing period, amount, coupon discount, GST breakdown (CGST/SGST or IGST, with HSN/SAC code and place of supply), and payment method. For customers **outside India**, invoices show **"96 — Other Countries"** as the place of supply (the GSTR-1 code for exports of services). An invoice is created for every charge, including your **first** subscription payment, and you get it by email once the payment succeeds.
 
 Every charge shows two numbers: an **order number** (`ORD-…`) is assigned when the charge is initiated, and a **tax invoice number** (`INV-…`) is assigned only once the payment succeeds. Pending or abandoned checkouts therefore never consume invoice numbers — only completed payments do. Zero-value documents (such as coupon-covered free renewals) get an invoice number immediately because they settle at issuance.
 

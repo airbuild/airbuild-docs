@@ -22,7 +22,8 @@ bundletool build-apks --bundle=app.aab --output=app.apks --mode=universal
 The number of team members you can invite is limited by your plan:
 
 - **Free** — 2 members
-- **Starter** — 5 members
+- **Indie** — 3 members
+- **Starter** — 8 members
 - **Pro** — 20 members
 - **Business** — 50 members
 - **Enterprise** — Unlimited
@@ -42,7 +43,8 @@ Install links can be shared with anyone — you don't need to add someone as a t
 The **hard cap is 2 GB** for any plan. Plan-based limits apply below that:
 
 - Free — 100 MB
-- Starter — 300 MB
+- Indie — 250 MB
+- Starter — 400 MB
 - Pro — 1 GB
 - Business — 2 GB
 - Enterprise — Custom

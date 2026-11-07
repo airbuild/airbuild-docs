@@ -41,12 +41,13 @@ Install links expire automatically based on your plan:
 | Plan        | Link expiry |
 | ----------- | ----------- |
 | Free        | 7 days      |
+| Indie       | 14 days     |
 | Starter     | 30 days     |
 | Pro         | Never       |
 | Business    | Never       |
 | Enterprise  | Never       |
 
-Expired links return a "link expired" page and can't be used to install. Create a new link to restore access.
+Expired links return a "link expired" page and can't be used to install. On the app page, an expired link shows a **"Link expired"** badge (and no copyable URL) — use **Regenerate** to create a fresh link and restore access. Live links show a **copy button** next to them so you can share the URL directly, plus their expiry date and download count/quota.
 
 ## Download quota
 

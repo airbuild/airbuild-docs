@@ -56,7 +56,7 @@ For enterprise-distributed apps, iOS requires you to manually trust the develope
 
 ### Install link expired
 
-- Check the **expiry date** on the build detail page. Link expiry depends on your plan (7 days on Free, 30 days on Starter, never on Pro/Enterprise).
+- Check the **expiry date** on the build detail page. Link expiry depends on your plan (7 days on Free, 14 days on Indie, 30 days on Starter, never on Pro/Enterprise).
 - Create a **new link** from the build detail page to restore access.
 
 ### Install link not working

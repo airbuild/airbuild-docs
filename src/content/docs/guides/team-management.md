@@ -88,7 +88,8 @@ The number of members you can invite depends on your plan:
 | Plan        | Members     |
 | ----------- | ----------- |
 | Free        | 2           |
-| Starter     | 5           |
+| Indie       | 3           |
+| Starter     | 8           |
 | Pro         | 20          |
 | Business    | 50          |
 | Enterprise  | Unlimited   |

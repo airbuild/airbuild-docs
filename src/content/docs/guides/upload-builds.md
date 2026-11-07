@@ -33,7 +33,8 @@ File size limits depend on your plan. There is a **2 GB hard cap** regardless of
 | Plan        | Max build size |
 | ----------- | -------------- |
 | Free        | 100 MB         |
-| Starter     | 300 MB         |
+| Indie       | 250 MB         |
+| Starter     | 400 MB         |
 | Pro         | 1 GB           |
 | Business    | 2 GB           |
 | Enterprise  | Custom         |

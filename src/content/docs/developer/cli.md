@@ -17,13 +17,20 @@ curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.
 
 This downloads the latest binary, installs it to `~/.local/bin/airbuild`, and checks that the directory is in your PATH.
 
+The binary is verified against the release's `checksums.txt` (SHA-256) before it is installed; a missing or mismatching checksum aborts the install. Pin a version or choose the directory with environment variables:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | AIRBUILD_VERSION=v1.2.0 bash
+curl -fsSL https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.sh | AIRBUILD_INSTALL_DIR=$HOME/bin bash
+```
+
 ### Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/airbuild/airbuild-cli/main/install.ps1 | iex
 ```
 
-This downloads the latest binary, installs it to `%LOCALAPPDATA%\AirBuild\airbuild.exe`, and adds the directory to your user PATH.
+This downloads the latest binary, installs it to `%LOCALAPPDATA%\AirBuild\airbuild.exe`, and adds the directory to your user PATH. The download is verified against `checksums.txt` too, and `$env:AIRBUILD_VERSION = "v1.2.0"` pins a version.
 
 ### Manual download
 
@@ -65,7 +72,17 @@ Authenticate with an API key — [create one on the API Keys page](https://airbu
 airbuild login --api-key airbuild_xxx
 ```
 
-This stores your API key in the config file at `~/.airbuild/config.json` (on Windows: `%USERPROFILE%\.airbuild\config.json`).
+This stores your API key in the config file at `~/.airbuild/config.json` (on Windows: `%USERPROFILE%\.airbuild\config.json`). The config file holds credentials and server settings only (API key, API URL, organization) — which app a project deploys to lives in the project's `.airbuild.json`.
+
+A `--api-key` value is visible in your shell history and process list. Prefer reading it from stdin or the environment:
+
+```bash
+echo "$AIRBUILD_API_KEY" | airbuild login --api-key-stdin
+AIRBUILD_API_KEY=airbuild_xxx airbuild login
+airbuild logout          # remove the stored key
+```
+
+`login` and `config set --api-url` warn if the URL is plain `http://` to a non-local host, because the key would be sent unencrypted.
 
 ### Environment variables (CI/CD & agents)
 
@@ -100,6 +117,10 @@ airbuild push                  # uploads the build and prints the install link
 
 ## Commands
 
+### Colors and progress
+
+Colors are only used on terminals and are disabled by `NO_COLOR` (see no-color.org) or `TERM=dumb`; piped output never contains escape codes. Build uploads show a progress bar on stderr when it is a terminal. Uploads are streamed from disk, so memory use stays flat even for multi-GB builds, and idempotent requests (GET) are retried automatically on network errors, 429 and 502/503/504.
+
 ### Machine-readable output (`--json`)
 
 Every command accepts a global `--json` flag. In JSON mode, stdout carries only machine-readable JSON — progress, tables, and errors go to stderr, and failures exit with a non-zero status. This is the recommended mode for scripts and AI agents:
@@ -119,14 +140,16 @@ Create a `.airbuild.json` config file for your project. This enables `airbuild p
 airbuild init                    # Interactive setup
 airbuild init --app-id clxxxx    # Link an existing app by ID
 airbuild init --yes              # Non-interactive: accept all defaults
-airbuild init --agents           # Also write AGENTS.md/CLAUDE.md for AI coding assistants
+airbuild init --yes --force      # ...and overwrite an existing .airbuild.json
+airbuild init --agents           # Also write AGENTS.md/CLAUDE.md and AirBuild skills for AI coding assistants
 ```
 
 | Flag | Description | Default |
 | ---- | ----------- | ------- |
 | `--app-id` | Link an existing app by ID | prompt |
-| `--yes` | Non-interactive — answer yes to prompts and accept defaults | no |
-| `--agents` | Write AI assistant instruction files (`AGENTS.md`, `CLAUDE.md`) — see [AI Coding Assistants](./ai-agents/) | no |
+| `--yes` | Non-interactive — answer yes to prompts and accept defaults. Fails (exit 1) if `.airbuild.json` already exists unless `--force` is set | no |
+| `--force` | Overwrite an existing `.airbuild.json` | no |
+| `--agents` | Write AI assistant files (`AGENTS.md`, `CLAUDE.md`, and the `airbuild-distribution` / `airbuild-codepush` skills) — see [AI Coding Assistants](./ai-agents/) | no |
 
 The interactive flow:
 
@@ -306,13 +329,48 @@ Check for a newer version and upgrade the CLI in place. Queries the GitHub Relea
 ```bash
 airbuild upgrade           # Upgrade to the latest version
 airbuild upgrade --check   # Only check if an update is available
+airbuild upgrade --version v1.2.0   # Install a specific version (also downgrades)
 ```
+
+The downloaded binary is verified against the release's `checksums.txt` (SHA-256) before it replaces the current one; a release without a matching checksum is refused. If the install directory isn't writable, the command says so and suggests `sudo` or a user directory.
 
 | Flag     | Description                                  | Default |
 | -------- | -------------------------------------------- | ------- |
 | `--check`| Only check if an update is available         | no      |
+| `--version` | Install this version instead of the latest | latest |
+
+After a successful upgrade, `airbuild agents sync` runs automatically for the project in your current directory (see below).
 
 You can also check the version at any time with `airbuild version` or `airbuild --version`.
+
+### `airbuild guide`
+
+Print a task runbook generated by the installed CLI — the same text AI agents are told to read, and always in step with your CLI version.
+
+```bash
+airbuild guide                 # list topics
+airbuild guide distribution    # upload, install links, iOS UDIDs, in-app SDKs, CI, webhooks
+airbuild guide codepush        # OTA shared rules (patch vs new binary, rollout, auto-pause)
+airbuild guide flutter         # Flutter CodePush runbook
+airbuild guide react-native    # React Native CodePush runbook
+airbuild guide flutter --json  # {"topic","version","content"}
+```
+
+### `airbuild agents`
+
+Keep the AI assistant files written by `init --agents` in step with the CLI.
+
+```bash
+airbuild agents sync     # refresh AirBuild-managed files (never creates files)
+airbuild agents check    # exit 1 if any are older than this CLI — handy in CI
+```
+
+| Flag | Description | Default |
+| ---- | ----------- | ------- |
+| `--dir` | Project directory | `.` |
+| `--quiet` | (`sync`) print nothing unless files changed | no |
+
+Only the marker-managed block in `AGENTS.md` / `CLAUDE.md` and skill files carrying the `airbuild:skill` marker are touched. See [AI Coding Assistants](./ai-agents/).
 
 ## CodePush / OTA updates
 
