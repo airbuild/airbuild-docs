@@ -62,6 +62,19 @@ export default defineConfig({
           ],
         },
       ],
+      head: [
+        {
+          tag: 'script',
+          attrs: { type: 'application/ld+json' },
+          content: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'AirBuild Docs',
+            url: 'https://docs.airbuild.dev',
+            publisher: { '@type': 'Organization', name: 'AirBuild', url: 'https://airbuild.dev' },
+          }),
+        },
+      ],
       customCss: ['./src/styles/custom.css'],
     }),
   ],
