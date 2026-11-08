@@ -92,14 +92,25 @@ Rollback disables the update immediately — devices will revert to the previous
 
 ## Dashboard
 
-The **OTA Updates** tab on each app's detail page shows:
+Each app's detail page is organized into tabs: **Builds**, **OTA Updates**, **Devices** (iOS apps), **Analytics**, and **Settings**.
 
-- **Setup instructions** — how to integrate the updater into your app
+The **OTA Updates** tab shows:
+
 - **Release history** — all releases and their patches/updates
 - **Patch history** — status, rollout %, channel, and creation date for each patch
 - **Channels** — current active update per channel
-- **Signing key** — public key for verifying update integrity (React Native)
 - **Actions** — promote, rollback, and adjust rollout from the UI
+- **Integration details** — collapsed by default; expand it for the AirBuild config snippet, CLI setup commands, and the code signing certificate (React Native) plus the **Rotate signing key** button
+
+The **Settings** tab holds app settings (rename, archive) and **Integration Keys** (distribution key) — moved out of the Builds tab.
+
+### Signing key rotation
+
+Rotate the key from the OTA tab's integration details (**Rotate signing key**) or via `POST /api/apps/{appId}/codepush/signing-key`. On rotation:
+
+- A new keypair is generated; the old public key is kept as the *previous* key during a **30-day grace period** so devices still on it can verify already-signed updates.
+- Rebuild your app with the new public key/certificate within that window — after grace the previous key is automatically purged by the daily cleanup cron (`purgeExpiredPreviousKeys`) and old-key devices can no longer verify new patches.
+- Purge timing: checked daily at the cleanup cron (05:00 UTC); a key is purged when `rotatedAt` is older than 30 days and a previous key is still stored.
 
 ## CLI overview
 
