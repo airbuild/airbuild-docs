@@ -27,7 +27,9 @@ For current limits and prices per plan, always refer to the **[Pricing page](htt
 | OTA patch downloads/mo | Each asset a device fetches when downloading an OTA update — one patch is several assets, so this number is far larger than "number of updates installed". |
 | OTA devices/mo | **Unique devices** that check in for OTA updates each month — your monthly active devices (same metric as competitors' MAU). One device counts once regardless of how many updates it pulls. |
 | Apple device management | Automatic UDID capture and device registration on your Apple Developer account. |
-| API access / Webhooks | REST API and outbound webhooks for automation. |
+| API access / Webhooks | REST API and outbound webhooks for automation. Every plan includes webhooks — free plans get 1 endpoint with core events; paid plans get more endpoints and the full event set. |
+| Audit logs | View the org audit log (member changes, API keys, releases, billing events). Recording runs on all plans; viewing requires Pro or above. |
+| Support | Free plans get community support via Discord; paid plans get in-app support tickets. |
 | White-label / SSO | Branding removal and single sign-on. |
 
 ## Payment method

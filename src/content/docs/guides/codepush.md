@@ -104,6 +104,10 @@ The **OTA Updates** tab shows:
 
 The **Settings** tab holds app settings (rename, archive) and **Integration Keys** (distribution key) — moved out of the Builds tab.
 
+### Key custody
+
+Signing keys are generated per organization. The private key is stored **AES-256-GCM encrypted** — never plaintext. Organizations on deployments with the optional **dedicated key-management service (KMS)** enabled keep their private key inside the KMS instead: key material never reaches application memory and cannot be exported — signing happens inside the KMS under a non-exportable policy. Rotating your key migrates it to KMS custody automatically when KMS is enabled.
+
 ### Signing key rotation
 
 Rotate the key from the OTA tab's integration details (**Rotate signing key**) or via `POST /api/apps/{appId}/codepush/signing-key`. On rotation:

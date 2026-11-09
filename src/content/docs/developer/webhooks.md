@@ -13,7 +13,7 @@ A webhook is an HTTP callback: AirBuild sends an HTTP POST request to a URL you 
 
 ## Configuring webhooks
 
-1. Go to **Settings > Webhooks** in the dashboard.
+1. Go to **Webhooks** in the dashboard sidebar.
 2. Click **Create Webhook**.
 3. Enter the **URL** where AirBuild should send events.
 4. Select the **events** you want to subscribe to.
@@ -26,6 +26,13 @@ A **webhook secret** is auto-generated for each webhook (format: `whsec_...`). U
 Each webhook has a unique secret prefixed with `whsec_`. You'll find it on the webhook detail page. Use it to verify the signature of incoming requests — see [Signature verification](#signature-verification) below.
 
 > Keep the webhook secret secure. Anyone with the secret can forge valid webhook signatures.
+
+## Plan limits
+
+Webhooks are available on **all plans** — the number of endpoints and the event set differ:
+
+- **Free:** 1 webhook endpoint, core events only (`build.uploaded`, `build.deleted`, `install_link.*`, `codepush.release_created`)
+- **Paid plans:** more endpoints and the full event set — see [Billing & Plans](../guides/billing/) for per-plan limits
 
 ## Supported events
 
@@ -43,6 +50,11 @@ Each webhook has a unique secret prefixed with `whsec_`. You'll find it on the w
 | `invoice.paid`                 | An invoice is paid.                              |
 | `member.invited`               | A team member is invited.                        |
 | `member.removed`               | A team member is removed.                        |
+| `support_ticket.created`       | A support ticket is created.                     |
+| `support_ticket.responded`     | A support ticket gets a response.                |
+| `codepush.release_created`     | An OTA (CodePush) release is published.          |
+
+> Billing, member, and support-ticket events require a paid plan — the free plan is limited to the core event set above.
 | `support_ticket.created`       | A support ticket is created.                     |
 | `support_ticket.responded`     | A support ticket receives a response.            |
 

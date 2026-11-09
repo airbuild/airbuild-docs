@@ -59,7 +59,7 @@ The **hard cap is 2 GB** for any plan. Plan-based limits apply below that:
 
 ## What are audit logs?
 
-The **Audit Logs** page records security-relevant actions in your organization — member changes, credential updates, device registrations and removals, deletions — along with who performed each action and when. Any organization member can view it; use it to trace who changed what.
+The **Audit Logs** page records security-relevant actions in your organization — member changes, credential updates, device registrations and removals, deletions — along with who performed each action and when. Audit logging runs on every plan; **viewing** the log requires the **Pro plan or above**.
 
 ## Can I recover something I deleted?
 
@@ -69,7 +69,7 @@ The **Audit Logs** page records security-relevant actions in your organization �
 
 ## How does virus scanning work?
 
-All uploads are scanned with **ClamAV** before being made available for download. If ClamAV is unavailable (e.g. the daemon is down), the scan **fails open** — the build is still processed and made available. This ensures uploads aren't blocked by scanner outages.
+All uploads are scanned with **ClamAV** before being made available for download. If ClamAV is unavailable (e.g. the daemon is down), uploads are **rejected** rather than skipped — scans fail closed so an unscanned build can never reach testers.
 
 ## Have another question?
 
