@@ -92,7 +92,12 @@ Release notes are optional. Enter a short description of what's new in this buil
 
 ## Virus scanning
 
-Every upload is scanned with **ClamAV** before it becomes available for download. If ClamAV is unavailable, the scan fails open (the build is still processed) — see [Troubleshooting](../resources/troubleshooting/) for details.
+Every upload is scanned with **ClamAV** before it can be downloaded. The scan runs **in the background** — uploads return immediately with the build marked **Scanning…**, and downloads and install links stay disabled until the scan completes:
+
+- **Scanning…** — the scan is in progress; the install page shows a scanning notice and downloads return a "still being scanned" error.
+- **Clean** — downloads and install links activate automatically.
+- **Blocked by virus scan** — a threat was detected; the stored file is deleted and the build can't be downloaded. The build stays visible for your audit trail.
+- **Scan failed** — the scanner didn't respond (outage or timeout). Downloads stay blocked; an owner or admin can trigger a rescan from the build, and scans interrupted by a deploy are retried automatically on startup.
 
 ## Build statuses
 
@@ -103,9 +108,9 @@ PROCESSING ──▶ READY
           └──▶ FAILED
 ```
 
-- **PROCESSING** — The build is being scanned and metadata is being extracted.
-- **READY** — The build is available for download and install links are active.
-- **FAILED** — Something went wrong (corrupt file, virus detected, parse error). Check the error message on the build detail page.
+- **PROCESSING** — The build is being uploaded and metadata is being extracted.
+- **READY** — The build is processed. It becomes downloadable once the virus scan reports **Clean** (instantly when scanning is disabled).
+- **FAILED** — Something went wrong (corrupt file, parse error). Check the error message on the build detail page.
 
 ## Install link
 

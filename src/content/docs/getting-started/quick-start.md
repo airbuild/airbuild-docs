@@ -36,7 +36,7 @@ An organization is a workspace for your team and apps. Your first organization i
 4. Optionally add **release notes**.
 5. Click **Upload**.
 
-AirBuild will scan the file with ClamAV, extract metadata (bundle ID, version, build number, app icon, and more), and process the build. The status moves from `PROCESSING` to `READY` (or `FAILED` if something goes wrong).
+AirBuild extracts metadata (bundle ID, version, build number, app icon, and more) and processes the build — the status moves from `PROCESSING` to `READY` (or `FAILED` if something goes wrong). The build is virus-scanned in the background and becomes downloadable once the scan reports clean.
 
 ## Step 5 — Get the install link
 
