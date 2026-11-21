@@ -52,6 +52,36 @@ curl -X POST https://airbuild.dev/api/upload \
   -F "releaseNotes=Bug fixes and performance improvements"
 ```
 
+#### Direct-to-storage upload (recommended for large builds)
+
+The multipart endpoint sends the file through the app server — and through any
+proxy in front of it (Cloudflare caps request bodies at ~100MB). For large
+builds, upload the file straight to object storage in three calls:
+
+```bash
+# 1. Reserve the upload — returns a presigned URL valid for 15 minutes
+curl -X POST https://airbuild.dev/api/upload/init \
+  -H "Authorization: Bearer airbuild_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"appId":"clxxxxx","fileName":"app.apk","fileSizeBytes":73400320,"platform":"ANDROID"}'
+# → {"uploadId":"…","uploadUrl":"https://s3…","expiresInSeconds":900}
+
+# 2. PUT the file bytes straight to storage (Content-Length must equal fileSizeBytes)
+curl -X PUT "https://s3…presigned…" --data-binary @./app.apk
+
+# 3. Finalize — server verifies the object, extracts metadata and queues the virus scan
+curl -X POST https://airbuild.dev/api/upload/finalize \
+  -H "Authorization: Bearer airbuild_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"appId":"clxxxxx","uploadId":"…","fileName":"app.apk","platform":"ANDROID","releaseNotes":"Bug fixes"}'
+# → same response shape as POST /api/upload
+```
+
+`finalize` is idempotent on `uploadId` — retrying it returns the existing
+build. `fileSizeBytes` is signed into the upload URL, so storage rejects a
+body whose size doesn't match. The AirBuild CLI uses this path automatically
+and falls back to `POST /api/upload` on older servers.
+
 ### Apps
 
 #### `GET /api/apps` — List apps
